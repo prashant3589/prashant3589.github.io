@@ -2,43 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Profile of [Name]</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Professional Resume</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
     <header>
-        <img src="[Profile Picture URL]" alt="[Name]'s Profile Picture">
-        <h1>[Name]</h1>
-        <h2>[Headline]</h2>
+        <div class="container">
+            <h1>Your Name</h1>
+            <p>Your Address | City, State ZIP | Email | Phone Number</p>
+        </div>
     </header>
-    <section id="summary">
-        <h3>Summary</h3>
-        <p>[Summary]</p>
-    </section>
-    <section id="experience">
-        <h3>Experience</h3>
-        <!-- Repeat for each position -->
-        <div class="position">
-            <h4>[Job Title]</h4>
-            <p>[Company Name] | [Date Range]</p>
-            <p>[Job Description]</p>
+    <section class="introduction">
+        <div class="container">
+            <h2>Introduction</h2>
+            <p>Brief summary about yourself, your career objectives, and key strengths.</p>
         </div>
     </section>
-    <section id="education">
-        <h3>Education</h3>
-        <!-- Repeat for each educational qualification -->
-        <div class="education">
-            <h4>[Degree]</h4>
-            <p>[Institution Name] | [Date Range]</p>
-            <p>[Additional Details]</p>
+    <section class="experience">
+        <div class="container">
+            <h2>Experience</h2>
+            <div class="job">
+                <h3>Job Title</h3>
+                <p>Company Name | Start Date – End Date</p>
+                <ul>
+                    <li>Responsibility or achievement #1</li>
+                    <li>Responsibility or achievement #2</li>
+                    <li>Responsibility or achievement #3</li>
+                </ul>
+            </div>
+            <!-- Repeat the above div.job block for each job experience -->
         </div>
     </section>
-    <section id="skills">
-        <h3>Skills</h3>
-        <ul>
-            <!-- Repeat for each skill -->
-            <li>[Skill Name]</li>
-        </ul>
+    <section class="education">
+        <div class="container">
+            <h2>Education</h2>
+            <div class="school">
+                <h3>Degree Earned</h3>
+                <p>School Name | Graduation Year</p>
+                <p>Relevant coursework or honors.</p>
+            </div>
+            <!-- Repeat the above div.school block for each educational qualification -->
+        </div>
     </section>
 </body>
 </html>
