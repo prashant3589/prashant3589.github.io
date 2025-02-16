@@ -1,15 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Game On</title>
+    <title>Game Play</title>
     <style>
         canvas {
             border: 1px solid black;
         }
     </style>
     <script>
-let x = 1;
-let y = 1;
+// Initial position of the rectangle
+let x = 200;
+let y = 150;
+const rectWidth = 50;
+const rectHeight = 50;
+        
 const speed = 5;
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
@@ -37,14 +41,12 @@ document.addEventListener('keydown', function(event) {
 });
 
 function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw rectangle
+    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
     ctx.fillStyle = 'blue';
-    ctx.fillRect(x, y, 5, 5);
+    ctx.fillRect(x, y, rectWidth, rectHeight);
 } 
         
-
+update();
     </script>
 </head>
     
