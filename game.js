@@ -35,7 +35,7 @@ document.addEventListener('keydown', function(event) {
 });
 
 const img = new Image();
-img.src = './image.png';
+img.src = './3d-render-little-boy-with-laptop-tools.jpg';
 
 img.onload = function() {
     function update() {
