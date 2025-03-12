@@ -66,11 +66,11 @@ ul {
 
     </style>
     <script>
-      function logInfo() {
-          console.log(JSON.stringify({ ip: data.ip }))
+      function logInfo() {          
           fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
         .then(data => {
+            console.log(JSON.stringify({ ip: data.ip }))
             fetch('http://localhost:3000/log', {
                 method: 'POST',
                 headers: {
