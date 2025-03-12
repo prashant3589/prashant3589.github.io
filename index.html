@@ -70,7 +70,8 @@ ul {
             {
                 fetch('https://api.ipify.org?format=json')
   .then(response => response.json())
-  .then(data => console.log("IP Address: " + data.ip); logData(data.ip) );
+  //.then(data => console.log("IP Address: " + data.ip));
+  .then(data => logData(data.ip) );
             }
         function logData(ip)
             {
