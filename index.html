@@ -76,8 +76,8 @@ ul {
             }
         function logData(ip)
             {
-                //const fs = require('fs');
-                import fs from 'fs';
+                const fs = require('fs');
+                //import fs from 'fs';
                 const { Parser } = require('json2csv');
                 const newData = [
                   { ipaddress: ip}
