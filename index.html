@@ -70,7 +70,24 @@ ul {
             {
                 fetch('https://api.ipify.org?format=json')
   .then(response => response.json())
-  .then(data => console.log("IP Address: " + data.ip));
+  .then(data => console.log("IP Address: " + data.ip); logData(data.ip) );
+            }
+        function logData(ip)
+            {
+                const fs = require('fs');
+                const { Parser } = require('json2csv');
+                const newData = [
+                  { ipaddress: ip}
+                ];
+                const json2csvParser = new Parser({ header: false });
+                const csv = json2csvParser.parse(newData);
+                fs.appendFile('data.csv', `\n${csv}`, (err) => {
+                  if (err) {
+                    console.error('Error appending data to CSV file', err);
+                  } else {
+                console.log('Data successfully appended to CSV file');
+                  }
+            });
             }
     </script>
 </head>
