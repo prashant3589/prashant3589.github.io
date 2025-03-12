@@ -66,6 +66,7 @@ ul {
 
     </style>
     <script>
+        import fs from 'fs';
         function logInfo()
             {
                 fetch('https://api.ipify.org?format=json')
@@ -75,7 +76,7 @@ ul {
             }
         function logData(ip)
             {
-                const fs = require('fs');
+                //const fs = require('fs');
                 const { Parser } = require('json2csv');
                 const newData = [
                   { ipaddress: ip}
