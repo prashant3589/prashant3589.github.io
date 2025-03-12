@@ -65,8 +65,16 @@ ul {
 } 
 
     </style>
+    <script>
+        function logInfo()
+            {
+                fetch('https://api.ipify.org?format=json')
+  .then(response => response.json())
+  .then(data => console.log("IP Address: " + data.ip));
+            }
+    </script>
 </head>
-<body>
+<body onload="logInfo()">
     <header>
         <div class="container">
             <h1>Prashant Narayangaonkar</h1>
