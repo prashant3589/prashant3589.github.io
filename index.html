@@ -65,7 +65,7 @@ ul {
 } 
 
     </style>
-    <script type="module">
+    <script>
         
         function logInfo()
             {
@@ -74,6 +74,8 @@ ul {
   //.then(data => console.log("IP Address: " + data.ip));
   .then(data => logData(data.ip) );
             }
+    </script>
+         <script type="module">
         function logData(ip)
             {
                 const fs = require('fs');
