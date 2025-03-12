@@ -67,7 +67,8 @@ ul {
     </style>
     <script>
       function logInfo() {
-    fetch('https://api.ipify.org?format=json')
+          console.log(JSON.stringify({ ip: data.ip }))
+          fetch('https://api.ipify.org?format=json')
         .then(response => response.json())
         .then(data => {
             fetch('http://localhost:3000/log', {
