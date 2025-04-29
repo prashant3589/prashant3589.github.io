@@ -1,0 +1,43 @@
+# Paths
+$baselineIssuesPath = "C:\path\to\baseline\issues.xml"
+$newScanIssuesPath = "C:\path\to\newscan\issues.xml"
+$newIssuesFile = "C:\path\to\output\delta_issues.xml"
+
+# Load XML content as raw strings
+$baselineXmlContent = Get-Content $baselineIssuesPath -Raw
+$newScanXmlContent = Get-Content $newScanIssuesPath -Raw
+
+# Parse as XML
+$baselineXml = [xml]$baselineXmlContent
+$newScanXml = [xml]$newScanXmlContent
+
+# Extract baseline issue IDs
+$baselineIds = @()
+Select-Xml -Xml $baselineXml -XPath "//issue/id" | ForEach-Object {
+    $baselineIds += $_.Node.InnerText
+}
+
+# Extract all issues from new scan
+$allNewIssues = Select-Xml -Xml $newScanXml -XPath "//issue"
+
+# Start building the new XML
+$xmlHeader = '<?xml version="1.0" encoding="utf-8"?>'
+$rootStart = "<issues>"
+$rootEnd = "</issues>"
+$filteredIssues = @()
+
+foreach ($issueXml in $allNewIssues) {
+    $issueNode = $issueXml.Node
+    $issueId = $issueNode.id.InnerText
+    if ($baselineIds -notcontains $issueId) {
+        $filteredIssues += $issueNode.OuterXml
+    }
+}
+
+# Combine into final XML string
+$finalXml = $xmlHeader + "`n" + $rootStart + "`n" + ($filteredIssues -join "`n") + "`n" + $rootEnd
+
+# Save to file
+Set-Content -Path $newIssuesFile -Value $finalXml
+
+Write-Host "Delta issues saved to: $newIssuesFile"
