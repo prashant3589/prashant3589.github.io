@@ -1,1 +1,33 @@
-$xmlContent = $xmlContent -replace [regex]::Escape($nodeXml), ""
+# File paths
+$baselinePath = "C:\path\to\baseline.xml"
+$newScanPath = "C:\path\to\newscan.xml"
+$outputPath = "C:\path\to\delta.xml"
+
+# Load baseline and new scan as XML
+[xml]$baselineXml = Get-Content $baselinePath -Raw
+[xml]$newScanXml = Get-Content $newScanPath -Raw
+
+# Get all baseline issue IDs
+$baselineIds = @()
+Select-Xml -Xml $baselineXml -XPath "//Issue" | ForEach-Object {
+    $baselineIds += $_.Node.id
+}
+
+# Make a copy of newScanXml as raw text to preserve formatting
+$deltaRaw = Get-Content $newScanPath -Raw
+
+# Loop through all <Issue> nodes in new scan
+$issuesToRemove = Select-Xml -Xml $newScanXml -XPath "//Issue" | Where-Object {
+    $baselineIds -contains $_.Node.id
+}
+
+# Remove each baseline issue from raw XML
+foreach ($issue in $issuesToRemove) {
+    $outer = $issue.Node.OuterXml
+    $deltaRaw = $deltaRaw -replace [regex]::Escape($outer), ""
+}
+
+# Save final delta XML
+$deltaRaw | Set-Content -Path $outputPath -Encoding UTF8
+
+Write-Host "✅ Delta XML saved to $outputPath (only new issues retained)."
