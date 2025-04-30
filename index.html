@@ -1,173 +1,85 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prashant Narayangaonkar</title>
-    <style>
-       body {
-    font-family: Arial, sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-}
-
-header {
-    background-color: #6739B7; /* Purple color */
-    color: white;
-    padding: 20px 0;
-}
-
-header .container {
-    width: 80%;
-    margin: auto;
-    text-align: center;
-}
-
-header h1 {
-    margin: 0;
-    font-size: 2.5em;
-}
-
-header p {
-    margin: 5px 0 0;
-}
-
-section {
-    padding: 20px 0;
-}
-
-section .container {
-    width: 80%;
-    margin: auto;
-}
-
-section h2 {
-    border-bottom: 2px solid ;
-    padding-bottom: 10px;
-}
-
-.job, .school {
-    margin-bottom: 20px;
-}
-
-.job h3, .school h3 {
-    margin: 0;
-}
-
-.job p, .school p {
-    margin: 5px 0;
-}
-
-ul {
-    list-style-type: disc;
-    margin: 10px 0 0 20px;
-} 
-
-    </style>
-    <script>
-      function logInfo() {          
-          fetch('https://api.ipify.org?format=json')
-        .then(response => response.json())
-        .then(data => {
-            //console.log(JSON.stringify({ ip: data.ip }))
-            fetch('http://localhost:3000/log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ip: data.ip })
-            })
-            .then(response => {
-                if (response.ok) {
-                    console.log('IP address logged successfully');
-                } else {
-                    console.error('Failed to log IP address');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-}
-
-       
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EagleFlyway</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-<body onload="logInfo()">
-    <header>
-        <div class="container">
-            <h1>Prashant Narayangaonkar</h1>
-        </div>
-    </header>
-    <section class="introduction">
-        <div class="container">
-            <h2>Introduction</h2>
-            <p>Dedicated Professional with a proven track record in steering transformative DevOps initiatives, targeting to express potential in challenging roles to leverageexpertise in Automation, CI/CD & Azure Cloud to optimize software development,enhance operational efficiency & contribute to the success of an innovative organization; committed towards delivering scalable, secure & reliable cloud solutions that align with the company's strategic objectives</p>
-        </div>
-    </section>
-    <section class="experience">
-        <div class="container">
-            <h2>Experience</h2>
-            <div class="job">
-                <h3>Associate Manager</h3>
-                <p>Accenture | Apr 22 – Present </p>
-                <ul>
-                    <li>Orchestrated the setup of application infrastructure using Terraform, ensuring robust deployment and streamlined management</li>
-                    <li>Configured self-hosted agents to optimize development processes and bolster scalability.</li>
-                    <li>Seamlessly integrated third-party services and developed functionapps to efficiently load and processdata into the database, refining data management workflows.</li>
-                    <li>Implemented a comprehensive branching strategy for deployments across various environments,ensuring organized and efficient deployment procedures.</li>
-                    <li>Collaborated closely with onshore customers for sprint planning,aligning userstories with the product roadmap to achieve project goals effectively.</li>
-                    <li>Provided adept technical leadership and support to a team of 5 members, guiding them through complex tasks and ensuring project success.</li>
-                    <li>Engineered a VideoIndexerAPI- consuming functionapp to extract thumbnailsandvideo data,augmenting media processing capabilities.</li>
-                    <li>Established pipelines for function app and Logic App Standard workflows, automating repetitive tasks and enhancing workflow efficiency.</li>
-                    <li>Coordinated with teammembers to strategizes print workeffectively,ensuring alignment with project timelines and objectives.</li>
-                    <li>Developed Biceptemplates forservice, topic, and subscriptions deployment, facilitating efficient infrastructure provisioning and management.</li>
-                </ul>
-            </div>
-            <div class="job">
-                <h3>Project Engineer II</h3>
-                <p>Johnsons Control | Sep 20 – Mar 22 </p>
-                <ul>
-                    <li>Spearheaded  the  implementation  of  REST  endpoints  from  Azure  Functions,  enhancing  the  application's interoperability and enabling seamless integration with external systems.</li>
-                    <li>Played  a  pivotal  role  in  deployment  processes  by  meticulously  craftingand  updating  ARM  templates, ensuring smooth and efficient deployment of application resources.</li>
-                    <li>Innovated by creating a new build release pipeline for a recently introduced microservice, optimizing the development and deployment workflows and expediting time-to-market.</li>
-                    <li>Assumed  the  role  of  Security  Champion,  diligently  verifying  vulnerabilities  in  the  application.  Leveraged VeraCode tool for static analysis security testing, ensuring robust protection against potential threats.</li>
-                    <li>Engineered  a  containerized  application  for  localization  utility,  significantly  improving  the  application's scalability  and  portability.  Successfully  deployed  the  application  to  a  container  instance,  enhancing deployment flexibility.</li>
-                    <li>Established  a  VPN  tunnel  to  facilitate  secure  networkconnectivity  from  the  application  to  devices  across the globe, ensuring data privacy and integrity in cross-border operations.</li>
-                </ul>
-            </div>
-             <div class="job">
-                <h3>Senior SoftWare Engineer</h3>
-                <p>Decos Software | Feb 18 – Sep 20 </p>
-                <ul>
-                    <li>OrchestratedtheseamlessimplementationofanActiveDirectoryB2Cworkflow,facilitatingsmoothaccess for multi-tenant users to collaborative tools.</li>
-                    <li>Spearheaded the integration of Graph API to streamline user access management and permissions within the collaboration tenant, ensuring enhanced security and efficiency.</li>
-                    <li>Led the development of arobust privacy protection application,focusing on coding, UI design, and rigorous testing to ensure compliance with privacy regulations.</li>
-                    <li>Implemented the Adyen payment system to facilitate recurring payments,resulting in improved order intake and a significant 15% revenue increase from enterprise subscriptions.</li>
-                </ul>
-            </div>
-             <div class="job">
-                <h3>System Engineer</h3>
-                <p>Tata Consultancy Services | Mar 13 – Feb 18 </p>
-                <ul>
-                    <li>Spearheaded the development of the Adient Finance Portal by meticulouslya nalyzing requirements,coding, designing intuitive user interfaces, and conducting rigorous module testing.</li>
-                    <li>Played  a  pivotal  role  in  various  projects  as  a  Systems  Engineer,  contributing  expertise  in  requirement analysis, coding, UI design, and comprehensive module testing.</li>
-                    <li>Led the transformation initiative by conducting thorough requirement analysis, coding, designing intuitive UIs, and executing meticulous testing protocols.</li>
-                </ul>
-            </div>
-            <!-- Repeat the above div.job block for each job experience -->
-        </div>
-    </section>
-    <section class="education">
-        <div class="container">
-            <h2>Education</h2>
-            <div class="school">
-                <h3>B.E.(ComputerScience)</h3>
-                <p>Maharana Pratap College of Technology ,Gwalior, MadhyaPradesh | 2012.</p>
-            </div>
-            <!-- Repeat the above div.school block for each educational qualification -->
-        </div>
-    </section>
+<body>
+
+<header class="header">
+  <div class="container">
+    <div class="logo">Egale<span>Flyway</span></div>
+    <nav class="nav">
+      <ul class="nav-links">
+        <li><a href="#home">Home</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#contact">Contact Us</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<section id="home" class="section hero-section">
+  <div class="container">
+    <h1>Innovate. Transform. Grow.</h1>
+    <p>Leading IT solutions for a connected future.</p>
+    <a href="#services" class="btn-primary">Our Services</a>
+  </div>
+</section>
+
+<section id="services" class="section services-section">
+  <div class="container">
+    <h2>Our Services</h2>
+    <div class="services-grid">
+      <div class="service-card">
+        <h3>Web Development</h3>
+        <p>We don’t just create websites — we craft powerful digital experiences that drive growth and inspire your audience.
+            Whether you need a sleek business site, a dynamic e-commerce platform, or a custom web application, our expert developers, designers, and strategists work together to deliver future-ready solutions.</p>
+      </div>
+      <div class="service-card">
+        <h3>Cloud Services</h3>
+        <p>We help businesses of all sizes unlock the full potential of the cloud.
+            From smarter infrastructure to seamless migration, we deliver secure, scalable, and cost-effective cloud solutions tailored to your needs.      
+            Our cloud experts ensure that your business is always agile, resilient, and ready for growth.</p>
+      </div>
+      <div class="service-card">
+        <h3>AI & Automation</h3>
+        <p>We believe in the power of intelligent automation to drive operational excellence, reduce costs, and enhance customer experiences. By leveraging AI technologies, we help you transform your business processes into more efficient, streamlined systems — leaving you more time to focus on what matters most.
+            Our AI & Automation solutions are designed to help businesses adapt quickly, scale seamlessly, and stay ahead of the competition.       
+            </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about" class="section about-section">
+  <div class="container">
+    <h2>About Us</h2>
+    <p>EagleFlyway is a global leader in IT consulting and services. We specialize in modern technologies to drive growth and success for businesses worldwide.</p>
+  </div>
+</section>
+
+<section id="contact" class="section contact-section">
+  <div class="container">
+    <h2>Contact Us</h2>
+    <form class="contact-form">
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea placeholder="Your Message" required></textarea>
+      <button type="submit" class="btn-primary">Send Message</button>
+    </form>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <p>&copy; 2025 EagleFlyway . All rights reserved.</p>
+  </div>
+</footer>
+
+<script src="script.js"></script>
 </body>
 </html>
