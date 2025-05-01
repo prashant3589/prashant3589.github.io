@@ -67,6 +67,8 @@
   /* Sections */
   .section {
     padding: 5rem 0;
+    opacity: 1 !important;
+    transform: none !important;
   }
   
   .hero-section {
