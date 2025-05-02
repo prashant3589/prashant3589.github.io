@@ -1,0 +1,60 @@
+# File paths
+$xmlPath = "C:\path\to\input.xml"
+$htmlPath = "C:\path\to\output.html"
+
+# Load XML
+[xml]$xmlDoc = Get-Content -Path $xmlPath -Raw
+
+# Begin HTML content
+$html = @"
+<html>
+<head>
+  <title>Issues Report</title>
+  <style>
+    body { font-family: Arial; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; }
+    th { background-color: #f2f2f2; }
+  </style>
+</head>
+<body>
+  <h2>Issues Report</h2>
+  <table>
+    <tr>
+      <th>Session #</th>
+      <th>Issue ID</th>
+      <th>CheckTypeTypeID</th>
+      <th>EngineType</th>
+      <th>VulnerabilityID</th>
+      <th>Severity</th>
+      <th>Name</th>
+    </tr>
+"@
+
+# Process Sessions
+$sessionNum = 1
+foreach ($session in $xmlDoc.Sessions.Session) {
+    foreach ($issue in $session.Issues.Issue) {
+        $id = $issue.id
+        $type = $issue.CheckTypeTypeID
+        $engine = $issue.EngineType
+        $vuln = $issue.VulnerabilityID
+        $severity = $issue.Severity
+        $name = $issue.Name
+
+        $html += "<tr><td>Session $sessionNum</td><td>$id</td><td>$type</td><td>$engine</td><td>$vuln</td><td>$severity</td><td>$name</td></tr>`n"
+    }
+    $sessionNum++
+}
+
+# Close HTML
+$html += @"
+  </table>
+</body>
+</html>
+"@
+
+# Write output
+$html | Set-Content -Path $htmlPath -Encoding UTF8
+
+Write-Host "✅ HTML report created at: $htmlPath"
