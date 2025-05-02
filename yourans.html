@@ -7,7 +7,7 @@ $htmlPath = "C:\path\to\output.html"
 
 # Begin HTML content
 $html = @"
-<html>
+&lt;<html>
 <head>
   <title>Issues Report</title>
   <style>
@@ -51,7 +51,7 @@ foreach ($session in $xmlDoc.Sessions.Session) {
 $html += @"
   </table>
 </body>
-</html>
+</html> &gt;
 "@
 
 # Write output
