@@ -1,17 +1,7 @@
-function Get-IdByInstanceId {
-    param (
-        [Parameter(Mandatory)]
-        [array]$DataArray,
-
-        [Parameter(Mandatory)]
-        [string]$InstanceId
-    )
-
-    foreach ($item in $DataArray) {
-        if ($item.instanceId -eq $InstanceId) {
-            return $item.id
-        }
-    }
-
-    return $null  # Return null if not found
-}
+- task: jfrog/jfrog-cli-v2@v0
+  inputs:
+    command: |
+      jfrog rt config --url=https://your-domain.jfrog.io/artifactory --user=$(jfrogServiceConnection.username) --apikey=$(jfrogServiceConnection.apikey) --interactive=false
+      jfrog rt nuget restore path/to/solution.sln --source=your-nuget-repo
+  env:
+    JFROG_CLI_OFFER_CONFIG: "false"
