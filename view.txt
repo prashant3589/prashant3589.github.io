@@ -1,17 +1,9 @@
-- script: |
-    echo "Adding Artifactory NuGet source..."
-    nuget sources Remove -Name "Artifactory" || echo "No existing source to remove"
-    nuget sources Add -Name "Artifactory" `
-                      -Source "$(ARTIFACTORY_URL)" `
-                      -Username "$(ARTIFACTORY_USERNAME)" `
-                      -Password "$(ARTIFACTORY_APIKEY)" `
-                      -StorePasswordInClearText
-    nuget sources List
-  displayName: 'Configure NuGet credentials for Artifactory'
-
-- task: NuGetCommand@2
+- task: JFrogCliV2@1
   displayName: 'Restore NuGet Packages from Artifactory'
   inputs:
-    command: 'restore'
-    restoreSolution: '**/*.sln'
-    feedsToUse: 'config'
+    artifactoryService: $(jfrogConnection)
+    command: >
+      jfrog rt nuget restore "$(solutionPath)"
+      --source=$(nugetRepo)
+      --build-name="$(buildName)"
+      --build-number="$(buildNumber)"
