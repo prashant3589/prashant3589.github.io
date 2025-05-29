@@ -1,13 +1,9 @@
-
-# Loop through all sessions and their issues in new scan
-foreach ($session in $newScanXml.Sessions.Session) {
-    $issues = @($session.Issues.Issue)  # Convert to array to safely iterate
-    foreach ($issue in $issues) {
-        if ($baselineIds -contains $issue.id) {
-            $null = $session.Issues.RemoveChild($issue)
-        }
-    }
-}
-
-# Save cleaned XML (delta)
-$newScanXml.Save($outputPath)
+- task: JFrogCliV2@1
+  displayName: 'Restore NuGet packages from Artifactory'
+  inputs:
+    artifactoryService: '$(jfrogService)'
+    command: >
+      jfrog rt nuget restore $(solutionPath)
+      --source=$(nugetRepo)
+      --build-name=$(buildName)
+      --build-number=$(buildNumber)
