@@ -1,9 +1,1 @@
-- task: JFrogCliV2@1
-  displayName: 'Restore NuGet Packages from Artifactory'
-  inputs:
-    artifactoryService: $(jfrogConnection)
-    command: >
-      jfrog rt nuget restore "$(solutionPath)"
-      --source=$(nugetRepo)
-      --build-name="$(buildName)"
-      --build-number="$(buildNumber)"
+xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
