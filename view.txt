@@ -1,1 +1,14 @@
-xmlns="http://schemas.microsoft.com/developer/msbuild/2003"
+Hi Alvina,
+
+I hope you're doing well.
+
+As part of our ongoing initiative to modernize the pipeline setup for the ## application, I wanted to check with you regarding the existing pipelines. Could you please confirm whether the current pipelines are actively in use, and if so, to what extent?
+
+Additionally, based on the details we've gathered for the ## application, could you advise if these pipelines can be considered within the scope of the modernization efforts? Your input will help us ensure we're covering all relevant components in the upcoming design and implementation.
+
+Please let me know if you'd like to connect for a quick discussion or if there's any documentation you'd like to share.
+
+Looking forward to your response.
+
+Best regards,
+Prashant Narayangaonkar
