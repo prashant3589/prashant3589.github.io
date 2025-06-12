@@ -1,1 +1,16 @@
-hi
+$pathsToRemove = @("C:\Program Files\dotnet")
+
+    # Split current PATH into individual entries
+    $originalPath = $env:PATH -split ';'
+
+    # Normalize both lists for comparison (trim and lowercase)
+    $normalizedToRemove = $pathsToRemove | ForEach-Object { $_.Trim().ToLower() }
+
+    # Filter out the paths
+    $filteredPath = $originalPath | Where-Object {
+        $normalized = $_.Trim().ToLower()
+        $normalizedToRemove -notcontains $normalized
+    }
+
+    # Rebuild PATH
+    $env:PATH = ($filteredPath -join ';')
