@@ -1,16 +1,6 @@
-$pathsToRemove = @("C:\Program Files\dotnet")
-
-    # Split current PATH into individual entries
-    $originalPath = $env:PATH -split ';'
-
-    # Normalize both lists for comparison (trim and lowercase)
-    $normalizedToRemove = $pathsToRemove | ForEach-Object { $_.Trim().ToLower() }
-
-    # Filter out the paths
-    $filteredPath = $originalPath | Where-Object {
-        $normalized = $_.Trim().ToLower()
-        $normalizedToRemove -notcontains $normalized
-    }
-
-    # Rebuild PATH
-    $env:PATH = ($filteredPath -join ';')
+dotnet nuget add source "https://<your-jfrog-domain>/artifactory/api/nuget/<your-repo>" `
+  --name JFrogSource `
+  --username "<your-username>" `
+  --password "<your-api-key-or-password>" `
+  --store-password-in-clear-text
+dotnet restore path\to\your.sln --source JFrogSource
