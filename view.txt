@@ -1,40 +1,11 @@
-Active Directory Group Naming Standards for Azure DevOps Integration
-Purpose
-This document defines the naming conventions and usage guidelines for Active Directory (AD) groups used within Azure DevOps (ADO), specifically for:
+- powershell: |
+    # Download and run Poetry install script
+    curl -sSL https://install.python-poetry.org | python -
 
-- Environment approval workflows
-- Role-based access control (RBAC) in ADO projects and organizations
-Section 1: AD Groups for ADO Environment Approvals
-Naming Standard
-[Prefix]-[ProjectName]-[Environment]-Approvers
-Examples
-Use Case	AD Group Name
-Production deployment approval for Project Phoenix	ADO-Phoenix-Prod-Approvers
-UAT deployment approval for Project Nova	ADO-Nova-UAT-Approvers
-Purpose
-These groups are used to configure manual approval checks in Azure DevOps Environments, where only designated approvers (members of the AD group) can approve deployment workflows.
-Guidelines
-- Use a consistent prefix (e.g., ADO-) to distinguish ADO-related groups.
-- Use Prod, UAT, Dev, etc., to clearly mark the environment.
-- Avoid user-specific or team-specific names unless tied to the project.
-- Keep group membership limited to users authorized to approve that environment.
-Section 2: AD Groups for ADO Role Assignments
-Naming Standard
-[Prefix]-[ProjectName]-[RoleName]
-Examples
-Role	AD Group Name
-Project Admins for Phoenix	ADO-Phoenix-Admins
-Contributors for Nova	ADO-Nova-Contributors
-Readers for Orion	ADO-Orion-Readers
-Purpose
-These groups are mapped to Azure DevOps roles to centrally manage permissions via Azure Active Directory, promoting RBAC best practices.
-Guidelines
-- RoleName must be one of: Admins, Contributors, Readers, Stakeholders, etc.
-- Avoid assigning permissions directly to users — always use AD groups.
-- Groups should be project-specific unless managing cross-project/global access (e.g., ADO-Global-Admins).
-Appendix
-Common Prefix Legend
-Prefix	Meaning
-ADO	Azure DevOps
-ENV	Environment (optional if you want to extend granularity)
+    # Add Poetry's install path to PATH for current session
+    $poetryPath = "$env:APPDATA\Python\Scripts"
+    $env:Path += ";$poetryPath"
 
+    # Verify poetry
+    poetry --version
+  displayName: 'Install Poetry and set PATH'
