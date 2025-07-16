@@ -9,3 +9,8 @@
     # Verify poetry
     poetry --version
   displayName: 'Install Poetry and set PATH'
+
+
+$runner = Get-ChildItem -Recurse -Filter runner.py | Select-Object -First 1
+    Write-Host "Running: $($runner.FullName)"
+    poetry run python $runner.FullName
