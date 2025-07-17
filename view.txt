@@ -1,16 +1,25 @@
 - powershell: |
-    # Download and run Poetry install script
-    curl -sSL https://install.python-poetry.org | python -
+    # Set download URL and destination paths
+$allureZipUrl = "https://your-artifactory-domain/artifactory/path/to/allure.zip"
+$destination = "$env:TEMP\allure.zip"
+$extractPath = "C:\tools\allure"
 
-    # Add Poetry's install path to PATH for current session
-    $poetryPath = "$env:APPDATA\Python\Scripts"
-    $env:Path += ";$poetryPath"
+# OPTIONAL: Auth header for JFrog (basic or token)
+$headers = @{
+    Authorization = "Bearer YOUR_JFROG_API_TOKEN"
+    # OR for basic auth: Authorization = "Basic BASE64ENCODED(username:apikey)"
+}
 
-    # Verify poetry
-    poetry --version
-  displayName: 'Install Poetry and set PATH'
+# Download allure.zip
+Invoke-WebRequest -Uri $allureZipUrl -Headers $headers -OutFile $destination
 
+# Create directory and extract
+New-Item -ItemType Directory -Path $extractPath -Force
+Expand-Archive -Path $destination -DestinationPath $extractPath -Force
 
-$runner = Get-ChildItem -Recurse -Filter runner.py | Select-Object -First 1
-    Write-Host "Running: $($runner.FullName)"
-    poetry run python $runner.FullName
+# Add Allure bin to PATH for current session
+$allureBin = Get-ChildItem -Path $extractPath -Recurse -Directory | Where-Object { $_.Name -eq "bin" } | Select-Object -First 1
+$env:Path += ";$($allureBin.FullName)"
+
+# Verify
+allure --version
