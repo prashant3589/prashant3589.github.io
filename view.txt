@@ -1,25 +1,10 @@
-- powershell: |
-    # Set download URL and destination paths
-$allureZipUrl = "https://your-artifactory-domain/artifactory/path/to/allure.zip"
-$destination = "$env:TEMP\allure.zip"
-$extractPath = "C:\tools\allure"
+# Path to your JSON file
+$jsonPath = "C:\path\to\file.json"
 
-# OPTIONAL: Auth header for JFrog (basic or token)
-$headers = @{
-    Authorization = "Bearer YOUR_JFROG_API_TOKEN"
-    # OR for basic auth: Authorization = "Basic BASE64ENCODED(username:apikey)"
-}
+# Read and encode
+$jsonContent = Get-Content $jsonPath -Raw
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonContent)
+$base64 = [System.Convert]::ToBase64String($bytes)
 
-# Download allure.zip
-Invoke-WebRequest -Uri $allureZipUrl -Headers $headers -OutFile $destination
-
-# Create directory and extract
-New-Item -ItemType Directory -Path $extractPath -Force
-Expand-Archive -Path $destination -DestinationPath $extractPath -Force
-
-# Add Allure bin to PATH for current session
-$allureBin = Get-ChildItem -Path $extractPath -Recurse -Directory | Where-Object { $_.Name -eq "bin" } | Select-Object -First 1
-$env:Path += ";$($allureBin.FullName)"
-
-# Verify
-allure --version
+# Output
+$base64
