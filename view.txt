@@ -1,6 +1,4 @@
-$user = "USERNAME"
-Get-LocalGroup | ForEach-Object {
-    if (Get-LocalGroupMember -Group $_.Name -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*$user*" }) {
-        Write-Output "$user is a member of $($_.Name)"
-    }
-}
+# Read and encode
+$jsonContent = Get-Content $jsonPath -Raw
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonContent)
+$base64 = [System.Convert]::ToBase64String($bytes)
