@@ -1,4 +1,5 @@
-# Read and encode
-$jsonContent = Get-Content $jsonPath -Raw
-$bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonContent)
-$base64 = [System.Convert]::ToBase64String($bytes)
+$utf8 = [Text.Encoding]::UTF8
+$getBytes = $utf8.GetType().GetMethod("GetBytes", [Type[]]@([string]))
+$bytes = $getBytes.Invoke($utf8, @($json))
+$base64 = [Convert]::ToBase64String($bytes)
+$base64
