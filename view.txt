@@ -1,4 +1,5 @@
-# Load assembly and get the attribute
-$asm = [System.Reflection.Assembly]::LoadFrom("bin\Debug\netcoreapp3.1\MyApp.dll")
-$info = $asm.GetCustomAttributes([System.Reflection.AssemblyInformationalVersionAttribute], $false)
-$info.InformationalVersion
+Add-Type -AssemblyName System.Reflection.MetadataLoadContext
+$ctx = New-Object System.Reflection.MetadataLoadContext([System.Reflection.PathAssemblyResolver]::new(@()))
+$asm = $ctx.LoadFromAssemblyPath("C:\path\to\MyApp.dll")
+$attr = $asm.GetCustomAttributesData() | Where-Object { $_.AttributeType.Name -eq "AssemblyInformationalVersionAttribute" }
+$attr.ConstructorArguments[0].Value
