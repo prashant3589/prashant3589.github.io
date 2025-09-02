@@ -1,1 +1,4 @@
-dotnet exec --additional-deps $(pwd)/bin/Debug/netcoreapp3.1/MyApp.deps.json -p "System.Reflection.Assembly.LoadFile(\"$(pwd)/bin/Debug/netcoreapp3.1/MyApp.dll\").GetCustomAttribute(typeof(System.Reflection.AssemblyInformationalVersionAttribute)).InformationalVersion"
+# Load assembly and get the attribute
+$asm = [System.Reflection.Assembly]::LoadFrom("bin\Debug\netcoreapp3.1\MyApp.dll")
+$info = $asm.GetCustomAttributes([System.Reflection.AssemblyInformationalVersionAttribute], $false)
+$info.InformationalVersion
