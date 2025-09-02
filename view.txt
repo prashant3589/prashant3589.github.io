@@ -3,3 +3,6 @@ $ctx = New-Object System.Reflection.MetadataLoadContext([System.Reflection.PathA
 $asm = $ctx.LoadFromAssemblyPath("C:\path\to\MyApp.dll")
 $attr = $asm.GetCustomAttributesData() | Where-Object { $_.AttributeType.Name -eq "AssemblyInformationalVersionAttribute" }
 $attr.ConstructorArguments[0].Value
+
+
+[System.Diagnostics.FileVersionInfo]::GetVersionInfo("C:\path\to\MyApp.dll").ProductVersion
