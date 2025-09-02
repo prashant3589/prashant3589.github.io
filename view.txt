@@ -1,1 +1,1 @@
- $reportPath = "$(Build.SourcesDirectory)\.scannerwork\report-task.txt"
+dotnet exec --additional-deps $(pwd)/bin/Debug/netcoreapp3.1/MyApp.deps.json -p "System.Reflection.Assembly.LoadFile(\"$(pwd)/bin/Debug/netcoreapp3.1/MyApp.dll\").GetCustomAttribute(typeof(System.Reflection.AssemblyInformationalVersionAttribute)).InformationalVersion"
