@@ -7,3 +7,23 @@
     ) > %USERPROFILE%\pip\.pip.config
   shell: cmd
   displayName: "Create pip config (CMD)"
+
+
+
+- script: |
+    echo "Adding Poetry to PATH..."
+
+    REM Get the Poetry installation path (default)
+    set "POETRY_PATH=%USERPROFILE%\AppData\Roaming\Python\Scripts"
+
+    REM Add Poetry path to the current session PATH
+    setx PATH "%POETRY_PATH%;%PATH%"
+
+    REM Also update PATH for the current script session
+    set PATH=%POETRY_PATH%;%PATH%
+
+    REM Check if poetry is now available
+    where poetry
+    poetry --version
+  displayName: "Add Poetry to PATH"
+
