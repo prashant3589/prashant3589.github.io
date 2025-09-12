@@ -1,8 +1,9 @@
-Add-Type -AssemblyName System.Reflection.MetadataLoadContext
-$ctx = New-Object System.Reflection.MetadataLoadContext([System.Reflection.PathAssemblyResolver]::new(@()))
-$asm = $ctx.LoadFromAssemblyPath("C:\path\to\MyApp.dll")
-$attr = $asm.GetCustomAttributesData() | Where-Object { $_.AttributeType.Name -eq "AssemblyInformationalVersionAttribute" }
-$attr.ConstructorArguments[0].Value
-
-
-[System.Diagnostics.FileVersionInfo]::GetVersionInfo("C:\path\to\MyApp.dll").ProductVersion
+- script: |
+    mkdir %USERPROFILE%\pip
+    (
+      echo [global]
+      echo index-url = https://pypi.org/simple
+      echo trusted-host = pypi.org
+    ) > %USERPROFILE%\pip\.pip.config
+  shell: cmd
+  displayName: "Create pip config (CMD)"
