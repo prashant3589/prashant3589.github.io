@@ -1,6 +1,15 @@
 # (Get-Item "C:\Path\To\Your.dll").VersionInfo | Format-List *
 # [Reflection.AssemblyName]::GetAssemblyName("C:\Path\To\Your.dll").Version
 # (Get-Item "file.dll").VersionInfo.FileVersion
+//var builder = new ConfigurationBuilder()
+//                .SetBasePath(Directory.GetCurrentDirectory())
+//                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+//
+//            IConfiguration config = builder.Build();
+
+//          string dllPath = config["DllPath"];
+
+
 using System;
 using System.Collections.Generic;
 using System.IO;
