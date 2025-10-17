@@ -8,6 +8,9 @@
 //            IConfiguration config = builder.Build();
 
 //          string dllPath = config["DllPath"];
+dotnet add package Microsoft.Extensions.Configuration
+dotnet add package Microsoft.Extensions.Configuration.FileExtensions
+dotnet add package Microsoft.Extensions.Configuration.Json
 
 
 using System;
