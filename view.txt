@@ -8,9 +8,9 @@
 //            IConfiguration config = builder.Build();
 
 //          string dllPath = config["DllPath"];
-dotnet add package Microsoft.Extensions.Configuration
-dotnet add package Microsoft.Extensions.Configuration.FileExtensions
-dotnet add package Microsoft.Extensions.Configuration.Json
+<PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
 
 
 using System;
