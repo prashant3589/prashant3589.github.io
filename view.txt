@@ -1,5 +1,5 @@
 # (Get-Item "C:\Path\To\Your.dll").VersionInfo | Format-List *
-
+# [Reflection.AssemblyName]::GetAssemblyName("C:\Path\To\Your.dll").Version
 using System;
 using System.Collections.Generic;
 using System.IO;
