@@ -1,3 +1,5 @@
+# (Get-Item "C:\Path\To\Your.dll").VersionInfo | Format-List *
+
 using System;
 using System.Collections.Generic;
 using System.IO;
