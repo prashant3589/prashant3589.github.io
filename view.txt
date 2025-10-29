@@ -10,6 +10,7 @@
 //          string dllPath = config["DllPath"];  
 git log -n 5 --pretty=format:"%ad" --date=short --name-only | awk 'NF{if($0 ~ /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/){date=$0}else{print date "\t" $0}}'
 https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48
+ <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
 <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
