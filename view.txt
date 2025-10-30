@@ -14,7 +14,10 @@ https://dotnet.microsoft.com/en-us/download/dotnet-framework/net48
 <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="3.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.0" />
-
+if ($folder.Name -eq "WebApp" -or $folder.Name -eq "API" -or $folder.Name -eq "Service") {
+        Write-Host "Matched folder: $($folder.Name)"
+        # your logic here
+    }
 
 using System;
 using System.Collections.Generic;
