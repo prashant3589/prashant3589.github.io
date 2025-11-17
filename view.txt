@@ -1,5 +1,7 @@
 As part of the Flyway self-hosted agent setup, we need to create dedicated service accounts to ensure secure, controlled, and auditable access for deployment and automation activities.
 These service accounts will be used by the Flyway agent to perform operations such as database migrations, version control integration, and CI/CD deployments without dependency on individual user credentials.
+pip install --force-reinstall --ignore-installed matplotlib==3.8.0
+
 using System;
 using System.Collections.Generic;
 using System.IO;
