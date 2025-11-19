@@ -1,7 +1,4 @@
-pool:
-  name: MyAgentPool
-  demands:
-    - Agent.Name -equals MySpecificAgentName
+Get-Module -ListAvailable Az* | Select-Object Name, Version
 
 
 using System;
