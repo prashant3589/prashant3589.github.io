@@ -1,90 +1,47 @@
-Get-Module -ListAvailable Az* | Select-Object Name, Version
+SELECT 
+    pr.name AS PrincipalName,
+    pr.type_desc AS PrincipalType,
+    pe.permission_name,
+    pe.state_desc AS PermissionState,
+    pe.class_desc,
+    OBJECT_NAME(pe.major_id) AS ObjectName
+FROM sys.database_permissions pe
+INNER JOIN sys.database_principals pr 
+    ON pe.grantee_principal_id = pr.principal_id
+WHERE pr.name = 'your_user_name';
 
 
-using System;
-using System.Collections.Generic;
-using System.IO;
-using ClosedXML.Excel;
 
-class Program
-{
-    static void Main()
-    {
-        string baselinePath = "Baseline.xlsx";
-        string newPath = "New.xlsx";
-        string outputPath = "New_Highlighted.xlsx";
 
-        // Define column names (must match Excel headers)
-        string locationColName = "Location";
-        string lineNumberColName = "LineNumber";
-        string categoryColName = "Category";
+SELECT 
+    sp.name AS PrincipalName,
+    sp.type_desc AS PrincipalType,
+    spm.permission_name,
+    spm.state_desc
+FROM sys.server_permissions spm
+INNER JOIN sys.server_principals sp 
+    ON spm.grantee_principal_id = sp.principal_id
+WHERE sp.name = 'your_login_name';
 
-        // Load baseline workbook and worksheet
-        using var baselineWb = new XLWorkbook(baselinePath);
-        var baselineWs = baselineWb.Worksheet(1);
 
-        // Read header row
-        var headerRow = 1;
-        var baselineHeaders = GetColumnIndexes(baselineWs, locationColName, lineNumberColName, categoryColName);
 
-        // Build HashSet of baseline keys
-        var baselineKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var row in baselineWs.RowsUsed().Skip(headerRow))
-        {
-            string loc = row.Cell(baselineHeaders.locationCol).GetValue<string>().Trim();
-            string line = row.Cell(baselineHeaders.lineNumberCol).GetValue<string>().Trim();
-            string cat = row.Cell(baselineHeaders.categoryCol).GetValue<string>().Trim();
-            baselineKeys.Add($"{loc}|{line}|{cat}");
-        }
+SELECT 
+    dp1.name AS UserName,
+    dp2.name AS RoleName
+FROM sys.database_role_members drm
+INNER JOIN sys.database_principals dp1 ON drm.member_principal_id = dp1.principal_id
+INNER JOIN sys.database_principals dp2 ON drm.role_principal_id = dp2.principal_id
+WHERE dp1.name = 'your_user_name';
 
-        // Load new workbook
-        using var newWb = new XLWorkbook(newPath);
-        var newWs = newWb.Worksheet(1);
 
-        var newHeaders = GetColumnIndexes(newWs, locationColName, lineNumberColName, categoryColName);
-
-        // Amber color fill
-        var amber = XLColor.FromHtml("#FFBF00");
-
-        // Compare and highlight new vulnerabilities
-        int highlightedCount = 0;
-        foreach (var row in newWs.RowsUsed().Skip(headerRow))
-        {
-            string loc = row.Cell(newHeaders.locationCol).GetValue<string>().Trim();
-            string line = row.Cell(newHeaders.lineNumberCol).GetValue<string>().Trim();
-            string cat = row.Cell(newHeaders.categoryCol).GetValue<string>().Trim();
-
-            string key = $"{loc}|{line}|{cat}";
-
-            if (!baselineKeys.Contains(key))
-            {
-                // Highlight entire row
-                row.Style.Fill.BackgroundColor = amber;
-                highlightedCount++;
-            }
-        }
-
-        newWb.SaveAs(outputPath);
-
-        Console.WriteLine($"✅ {highlightedCount} new vulnerabilities highlighted in {outputPath}");
-    }
-
-    // Helper method to find column indexes by name
-    static (int locationCol, int lineNumberCol, int categoryCol) GetColumnIndexes(IXLWorksheet ws, string locName, string lineName, string catName)
-    {
-        int locCol = 0, lineCol = 0, catCol = 0;
-
-        foreach (var cell in ws.Row(1).CellsUsed())
-        {
-            string name = cell.GetString().Trim();
-            if (name.Equals(locName, StringComparison.OrdinalIgnoreCase)) locCol = cell.Address.ColumnNumber;
-            if (name.Equals(lineName, StringComparison.OrdinalIgnoreCase)) lineCol = cell.Address.ColumnNumber;
-            if (name.Equals(catName, StringComparison.OrdinalIgnoreCase)) catCol = cell.Address.ColumnNumber;
-        }
-
-        if (locCol == 0 || lineCol == 0 || catCol == 0)
-            throw new Exception("One or more column names not found in header row.");
-
-        return (locCol, lineCol, catCol);
-    }
-}
+SELECT 
+    pr.name AS PrincipalName,
+    pr.type_desc AS PrincipalType,
+    pe.permission_name,
+    pe.state_desc,
+    pe.class_desc,
+    OBJECT_NAME(pe.major_id) AS ObjectName
+FROM sys.database_permissions pe
+INNER JOIN sys.database_principals pr 
+    ON pe.grantee_principal_id = pr.principal_id
+ORDER BY pr.name, pe.permission_name;
