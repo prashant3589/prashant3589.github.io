@@ -1,47 +1,50 @@
-SELECT 
-    pr.name AS PrincipalName,
-    pr.type_desc AS PrincipalType,
-    pe.permission_name,
-    pe.state_desc AS PermissionState,
-    pe.class_desc,
-    OBJECT_NAME(pe.major_id) AS ObjectName
-FROM sys.database_permissions pe
-INNER JOIN sys.database_principals pr 
-    ON pe.grantee_principal_id = pr.principal_id
-WHERE pr.name = 'your_user_name';
+using System;
+using System.IO;
+using System.Linq;
+using System.Collections.Generic;
 
+class Program
+{
+    static void Main(string[] args)
+    {
+        string folder1 = @"C:\Env1\Services";
+        string folder2 = @"C:\Env2\Services";
+        string csvOutput = @"C:\Output\ChangedLines.csv";
 
+        var csv = new List<string>();
+        csv.Add("FileName,LineNumber,Env1Line,Env2Line");
 
+        foreach (string file1 in Directory.GetFiles(folder1, "*.cs", SearchOption.AllDirectories))
+        {
+            string relativePath = Path.GetRelativePath(folder1, file1);
+            string file2 = Path.Combine(folder2, relativePath);
 
-SELECT 
-    sp.name AS PrincipalName,
-    sp.type_desc AS PrincipalType,
-    spm.permission_name,
-    spm.state_desc
-FROM sys.server_permissions spm
-INNER JOIN sys.server_principals sp 
-    ON spm.grantee_principal_id = sp.principal_id
-WHERE sp.name = 'your_login_name';
+            if (!File.Exists(file2))
+            {
+                csv.Add($"{relativePath},-,File missing in Env2,-");
+                continue;
+            }
 
+            string[] lines1 = File.ReadAllLines(file1);
+            string[] lines2 = File.ReadAllLines(file2);
 
+            int maxLines = Math.Max(lines1.Length, lines2.Length);
 
-SELECT 
-    dp1.name AS UserName,
-    dp2.name AS RoleName
-FROM sys.database_role_members drm
-INNER JOIN sys.database_principals dp1 ON drm.member_principal_id = dp1.principal_id
-INNER JOIN sys.database_principals dp2 ON drm.role_principal_id = dp2.principal_id
-WHERE dp1.name = 'your_user_name';
+            for (int i = 0; i < maxLines; i++)
+            {
+                string l1 = i < lines1.Length ? lines1[i] : "";
+                string l2 = i < lines2.Length ? lines2[i] : "";
 
+                if (l1.Trim() != l2.Trim())
+                {
+                    csv.Add($"{relativePath},{i + 1},\"{l1.Replace("\"", "'")}\",\"{l2.Replace("\"", "'")}\"");
+                }
+            }
+        }
 
-SELECT 
-    pr.name AS PrincipalName,
-    pr.type_desc AS PrincipalType,
-    pe.permission_name,
-    pe.state_desc,
-    pe.class_desc,
-    OBJECT_NAME(pe.major_id) AS ObjectName
-FROM sys.database_permissions pe
-INNER JOIN sys.database_principals pr 
-    ON pe.grantee_principal_id = pr.principal_id
-ORDER BY pr.name, pe.permission_name;
+        File.WriteAllLines(csvOutput, csv);
+
+        Console.WriteLine("CSV Created Successfully:");
+        Console.WriteLine(csvOutput);
+    }
+}
