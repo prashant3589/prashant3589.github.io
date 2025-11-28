@@ -1,50 +1,71 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Collections.Generic;
+To comply with enterprise change management policies, we need to integrate the Azure DevOps (ADO) deployment pipeline with ServiceNow (SNOW) to validate the Change Request (CHG) before allowing deployment to proceed.
 
-class Program
-{
-    static void Main(string[] args)
-    {
-        string folder1 = @"C:\Env1\Services";
-        string folder2 = @"C:\Env2\Services";
-        string csvOutput = @"C:\Output\ChangedLines.csv";
+This story involves implementing an automated gate/validation step in Azure DevOps pipelines that checks the status of a ServiceNow Change Request through ServiceNow REST APIs. The pipeline must only allow deployments when the associated Change Request is in an Approved / Scheduled / Implement state (as per organization policy).
 
-        var csv = new List<string>();
-        csv.Add("FileName,LineNumber,Env1Line,Env2Line");
 
-        foreach (string file1 in Directory.GetFiles(folder1, "*.cs", SearchOption.AllDirectories))
-        {
-            string relativePath = Path.GetRelativePath(folder1, file1);
-            string file2 = Path.Combine(folder2, relativePath);
+AC1: Service Account
 
-            if (!File.Exists(file2))
-            {
-                csv.Add($"{relativePath},-,File missing in Env2,-");
-                continue;
-            }
+A ServiceNow service account is created with API access permissions.
 
-            string[] lines1 = File.ReadAllLines(file1);
-            string[] lines2 = File.ReadAllLines(file2);
+Credentials are securely stored in Azure Key Vault or secure variable groups.
 
-            int maxLines = Math.Max(lines1.Length, lines2.Length);
+ADO pipeline is configured to use these credentials via secret variables.
 
-            for (int i = 0; i < maxLines; i++)
-            {
-                string l1 = i < lines1.Length ? lines1[i] : "";
-                string l2 = i < lines2.Length ? lines2[i] : "";
+AC2: ServiceNow API Validation
 
-                if (l1.Trim() != l2.Trim())
-                {
-                    csv.Add($"{relativePath},{i + 1},\"{l1.Replace("\"", "'")}\",\"{l2.Replace("\"", "'")}\"");
-                }
-            }
-        }
+Pipeline calls ServiceNow REST API to fetch Change Request details.
 
-        File.WriteAllLines(csvOutput, csv);
+API returns expected fields (number, state, approval, planned window).
 
-        Console.WriteLine("CSV Created Successfully:");
-        Console.WriteLine(csvOutput);
-    }
-}
+AC3: Deployment Gate Logic
+
+Pipeline must only proceed when:
+
+Change Request exists.
+
+Change Request state is one of:
+Approved, Scheduled, Implement.
+
+Approval = approved
+
+Current time is within Planned Start & End Time (if configured).
+
+If any validation fails:
+
+Pipeline must fail with a meaningful error message.
+
+AC4: Error Handling
+
+If the Change Request is missing or invalid, pipeline fails with message:
+"Change Request not found or unauthorized."
+
+If Change Request is in an unauthorized state, pipeline fails with message:
+"Change Request <CHG Number> is in <state>. Deployment not allowed."
+
+AC5: Pipeline Logging
+
+Pipeline logs the following information:
+
+Change Request number
+
+Change Request state
+
+Approval state
+
+Planned window
+
+Result of validation
+
+Logs are visible in pipeline execution history.
+
+AC6: Documentation
+
+Technical documentation is created describing:
+
+API URLs and sample request/response
+
+Permissions required for ServiceNow account
+
+Configuration steps for Azure DevOps integration
+
+Pipeline script/task used for validation
