@@ -1,71 +1,8 @@
-To comply with enterprise change management policies, we need to integrate the Azure DevOps (ADO) deployment pipeline with ServiceNow (SNOW) to validate the Change Request (CHG) before allowing deployment to proceed.
-
-This story involves implementing an automated gate/validation step in Azure DevOps pipelines that checks the status of a ServiceNow Change Request through ServiceNow REST APIs. The pipeline must only allow deployments when the associated Change Request is in an Approved / Scheduled / Implement state (as per organization policy).
-
-
-AC1: Service Account
-
-A ServiceNow service account is created with API access permissions.
-
-Credentials are securely stored in Azure Key Vault or secure variable groups.
-
-ADO pipeline is configured to use these credentials via secret variables.
-
-AC2: ServiceNow API Validation
-
-Pipeline calls ServiceNow REST API to fetch Change Request details.
-
-API returns expected fields (number, state, approval, planned window).
-
-AC3: Deployment Gate Logic
-
-Pipeline must only proceed when:
-
-Change Request exists.
-
-Change Request state is one of:
-Approved, Scheduled, Implement.
-
-Approval = approved
-
-Current time is within Planned Start & End Time (if configured).
-
-If any validation fails:
-
-Pipeline must fail with a meaningful error message.
-
-AC4: Error Handling
-
-If the Change Request is missing or invalid, pipeline fails with message:
-"Change Request not found or unauthorized."
-
-If Change Request is in an unauthorized state, pipeline fails with message:
-"Change Request <CHG Number> is in <state>. Deployment not allowed."
-
-AC5: Pipeline Logging
-
-Pipeline logs the following information:
-
-Change Request number
-
-Change Request state
-
-Approval state
-
-Planned window
-
-Result of validation
-
-Logs are visible in pipeline execution history.
-
-AC6: Documentation
-
-Technical documentation is created describing:
-
-API URLs and sample request/response
-
-Permissions required for ServiceNow account
-
-Configuration steps for Azure DevOps integration
-
-Pipeline script/task used for validation
+steps:
+- task: ServiceNow-DevOps-Check@1
+  inputs:
+    connectedServiceName: 'ServiceNow-Connection'
+    entityType: 'change'
+    entityId: 'CHG0032456'
+    checkType: 'status'
+    expectedStatus: 'Approved'
