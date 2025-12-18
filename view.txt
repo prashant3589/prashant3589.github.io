@@ -6,3 +6,20 @@ steps:
     entityId: 'CHG0032456'
     checkType: 'status'
     expectedStatus: 'Approved'
+
+- task: PowerShell@2
+  displayName: "FinalCleanup (safe)"
+  condition: always()
+  inputs:
+    targetType: inline
+    script: |
+      $work = "$(Agent.WorkFolder)"
+
+      if ($work -and (Test-Path $work) -and $work -like "*_work") {
+        Write-Host "Cleaning agent work folder: $work"
+        Remove-Item "$work\*" -Recurse -Force -ErrorAction SilentlyContinue
+      }
+      else {
+        Write-Error "Agent.WorkFolder path validation failed. Cleanup aborted."
+      }
+
