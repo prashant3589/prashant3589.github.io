@@ -1,1 +1,27 @@
-ServiceNow Service Account for Azure DevOps Integration
+Problem Statement
+
+Currently, Azure DevOps YAML pipelines do not provide a native mechanism to validate ServiceNow Change Requests (CRs) as part of the deployment process. As a result, production deployments can proceed without verifying whether:
+
+A valid Change Request exists in ServiceNow
+
+The Change Request is active
+
+The Change Request is approved and in an implementable state
+
+This gap introduces several challenges:
+
+Non-compliance with ITSM and change-management policies
+
+Audit and governance risks, as deployments may occur without an approved CR
+
+Manual validation, which is error-prone and difficult to enforce consistently
+
+Lack of centralized control, especially when multiple pipelines deploy to production
+
+Without an automated validation mechanism, enforcing ServiceNow change governance relies heavily on manual checks and process adherence rather than technical enforcement.
+
+Solution Overview
+
+To address this limitation, Azure DevOps Environments with ServiceNow Change Management integration are used to enforce pre-deployment validation of ServiceNow Change Requests.
+
+Azure DevOps provides the capability to configure approvals and checks at the Environment level, which are executed before a deployment job is allowed to start. By integrating the ServiceNow Change Management extension, the pipeline can automatically validate the Change Request against ServiceNow using predefined criteria.
