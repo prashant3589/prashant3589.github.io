@@ -1,25 +1,32 @@
-steps:
-- task: ServiceNow-DevOps-Check@1
-  inputs:
-    connectedServiceName: 'ServiceNow-Connection'
-    entityType: 'change'
-    entityId: 'CHG0032456'
-    checkType: 'status'
-    expectedStatus: 'Approved'
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
 
-- task: PowerShell@2
-  displayName: "FinalCleanup (safe)"
-  condition: always()
-  inputs:
-    targetType: inline
-    script: |
-      $work = "$(Agent.WorkFolder)"
+class Program
+{
+    static void Main()
+    {
+        string yamlFilePath = @"C:\pipeline\azure-pipelines.yml";
+        string yamlContent = File.ReadAllText(yamlFilePath);
 
-      if ($work -and (Test-Path $work) -and $work -like "*_work") {
-        Write-Host "Cleaning agent work folder: $work"
-        Remove-Item "$work\*" -Recurse -Force -ErrorAction SilentlyContinue
-      }
-      else {
-        Write-Error "Agent.WorkFolder path validation failed. Cleanup aborted."
-      }
+        // Match -DatabaseProjectName "Value" anywhere in arguments
+        var regex = new Regex(
+            @"-DatabaseProjectName\s+""([^""]+)""",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled
+        );
 
+        var projectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (Match match in regex.Matches(yamlContent))
+        {
+            projectNames.Add(match.Groups[1].Value.Trim());
+        }
+
+        Console.WriteLine("Unique Database Project Names:");
+        foreach (var name in projectNames)
+        {
+            Console.WriteLine(name);
+        }
+    }
+}
