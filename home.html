@@ -5,6 +5,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>FlyEagle</title>
   <link rel="stylesheet" href="style.css">
+  <script>
+    document.getElementById("contactForm").addEventListener("submit", async function (e) {
+  e.preventDefault(); // prevent page refresh
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const message = document.getElementById("message").value;
+  const responseMsg = document.getElementById("responseMsg");
+
+  try {
+    const response = await fetch("https://unexhibitable-kimora-observingly.ngrok-free.dev/api/Enquiry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        Name: name,
+        Email: email,
+        Message: message
+      })
+    });
+
+    if (response.status === 200) {
+      responseMsg.style.color = "green";
+      responseMsg.innerText = "We'll get back to you soon 😊";
+      document.getElementById("contactForm").reset();
+    } else {
+      responseMsg.style.color = "red";
+      responseMsg.innerText = "Something went wrong. Please try again.";
+    }
+
+  } catch (error) {
+    responseMsg.style.color = "red";
+    responseMsg.innerText = "Unable to connect to server.";
+    console.error(error);
+  }
+});
+  </script>
 </head>
 <body>
 
@@ -65,12 +103,14 @@
 <section id="contact" class="section contact-section">
   <div class="container">
     <h2>Contact Us</h2>
-    <form class="contact-form">
-      <input type="text" placeholder="Your Name" required>
-      <input type="email" placeholder="Your Email" required>
-      <textarea placeholder="Your Message" required></textarea>
-      <button type="submit" class="btn-primary">Send Message</button>
-    </form>
+    <form class="contact-form" id="contactForm">
+  <input type="text" id="name" placeholder="Your Name" required>
+  <input type="email" id="email" placeholder="Your Email" required>
+  <textarea id="message" placeholder="Your Message" required></textarea>
+  <button type="submit" class="btn-primary">Send Message</button>
+</form>
+
+<p id="responseMsg"></p>
   </div>
 </section>
 
