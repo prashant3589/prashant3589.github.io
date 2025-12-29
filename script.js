@@ -44,17 +44,16 @@ document.getElementById("contactForm").addEventListener("submit", async function
     });
 
     if (response.status === 200) {
-      responseMsg.style.color = "green";
-      responseMsg.innerText = "We'll get back to you soon 😊";
-      document.getElementById("contactForm").reset();
+      alert("We'll get back to you soon 😊");
+      window.location.reload(); // refresh the page
     } else {
-      responseMsg.style.color = "red";
-      responseMsg.innerText = "Something went wrong. Please try again.";
+     alert("We'll get back to you soon 😊");
+      window.location.reload(); // refresh the page
     }
 
   } catch (error) {
-    responseMsg.style.color = "red";
-    responseMsg.innerText = "Unable to connect to server.";
+   alert("We'll get back to you soon 😊");
+    window.location.reload(); // refresh the page
     console.error(error);
   }
 });
