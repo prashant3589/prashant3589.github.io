@@ -21,4 +21,40 @@ window.addEventListener('scroll', () => {
     section.style.opacity = 0;
     section.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
   });
-  
+
+document.getElementById("contactForm").addEventListener("submit", async function (e) {
+  e.preventDefault(); // prevent page refresh
+
+  const name = document.getElementById("name").value;
+  const email = document.getElementById("email").value;
+  const message = document.getElementById("message").value;
+  const responseMsg = document.getElementById("responseMsg");
+
+  try {
+    const response = await fetch("https://unexhibitable-kimora-observingly.ngrok-free.dev/api/Enquiry", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        Name: name,
+        Email: email,
+        Message: message
+      })
+    });
+
+    if (response.status === 200) {
+      responseMsg.style.color = "green";
+      responseMsg.innerText = "We'll get back to you soon 😊";
+      document.getElementById("contactForm").reset();
+    } else {
+      responseMsg.style.color = "red";
+      responseMsg.innerText = "Something went wrong. Please try again.";
+    }
+
+  } catch (error) {
+    responseMsg.style.color = "red";
+    responseMsg.innerText = "Unable to connect to server.";
+    console.error(error);
+  }
+});
