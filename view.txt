@@ -1,32 +1,25 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text.RegularExpressions;
+Story Title
 
-class Program
-{
-    static void Main()
-    {
-        string yamlFilePath = @"C:\pipeline\azure-pipelines.yml";
-        string yamlContent = File.ReadAllText(yamlFilePath);
+Resolve QA Automation Pipeline Failures Caused by Agent Disk Space Exhaustion
 
-        // Match -DatabaseProjectName "Value" anywhere in arguments
-        var regex = new Regex(
-            @"-DatabaseProjectName\s+""([^""]+)""",
-            RegexOptions.IgnoreCase | RegexOptions.Compiled
-        );
+Description
 
-        var projectNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+The QA automation pipeline is intermittently failing during execution because the build agent runs out of available disk space. The issue occurs due to repeated source code checkouts and accumulation of workspace artifacts on the agent machine. When disk usage reaches its limit, pipeline tasks fail, impacting test execution, release timelines, and overall pipeline reliability.
 
-        foreach (Match match in regex.Matches(yamlContent))
-        {
-            projectNames.Add(match.Groups[1].Value.Trim());
-        }
+This story aims to identify, mitigate, and permanently resolve disk space exhaustion on QA automation agents by implementing proper workspace cleanup, optimizing checkout behavior, and/or improving agent configuration to ensure consistent and stable pipeline runs.
 
-        Console.WriteLine("Unique Database Project Names:");
-        foreach (var name in projectNames)
-        {
-            Console.WriteLine(name);
-        }
-    }
-}
+Acceptance Criteria
+
+QA automation pipeline completes successfully without disk space–related failures.
+
+Agent disk usage remains below the defined safe threshold after pipeline execution.
+
+Source code checkout does not retain unnecessary files between pipeline runs.
+
+Workspace cleanup is automatically performed before or after pipeline execution.
+
+Pipeline logs clearly indicate cleanup and disk usage status.
+
+Solution works consistently across all QA automation pipelines using the same agent pool.
+
+No manual intervention is required to free disk space on the agent.
