@@ -1,25 +1,66 @@
 Story Title
 
-Resolve QA Automation Pipeline Failures Caused by Agent Disk Space Exhaustion
+Design and Implement Flyway Database Migration for Existing Application
 
 Description
 
-The QA automation pipeline is intermittently failing during execution because the build agent runs out of available disk space. The issue occurs due to repeated source code checkouts and accumulation of workspace artifacts on the agent machine. When disk usage reaches its limit, pipeline tasks fail, impacting test execution, release timelines, and overall pipeline reliability.
+The existing application currently lacks a standardized and automated database schema migration mechanism, which increases the risk of deployment failures, schema drift across environments, and manual intervention during releases.
 
-This story aims to identify, mitigate, and permanently resolve disk space exhaustion on QA automation agents by implementing proper workspace cleanup, optimizing checkout behavior, and/or improving agent configuration to ensure consistent and stable pipeline runs.
+This story focuses on designing and implementing Flyway as the database migration and version control solution for the application. The work will include creating a solution design, defining migration standards, integrating Flyway into the build and deployment pipelines, and validating schema consistency across all environments.
+
+The outcome will ensure controlled, repeatable, and auditable database changes aligned with CI/CD best practices.
 
 Acceptance Criteria
+Solution Design
 
-QA automation pipeline completes successfully without disk space–related failures.
+A documented Flyway solution design is created and reviewed, including:
 
-Agent disk usage remains below the defined safe threshold after pipeline execution.
+Flyway architecture and integration approach
 
-Source code checkout does not retain unnecessary files between pipeline runs.
+Database versioning strategy
 
-Workspace cleanup is automatically performed before or after pipeline execution.
+Migration naming conventions
 
-Pipeline logs clearly indicate cleanup and disk usage status.
+Rollback and repair strategy
 
-Solution works consistently across all QA automation pipelines using the same agent pool.
+Environment-specific configuration handling
 
-No manual intervention is required to free disk space on the agent.
+Design is approved by relevant stakeholders (DevOps, DB, Application teams).
+
+Implementation
+
+Flyway is integrated into the existing application repository.
+
+Baseline migration is created for the current database schema.
+
+Existing and new database changes are managed through Flyway versioned migration scripts.
+
+Flyway configuration supports multiple environments (Dev, QA, UAT, Prod).
+
+Flyway execution is automated via CI/CD pipeline (build or release stage).
+
+Flyway validates schema consistency before applying migrations.
+
+Validation & Quality
+
+Database migrations run successfully in lower environments without errors.
+
+Flyway prevents out-of-order or invalid migrations.
+
+Migration history table is created and maintained correctly.
+
+Pipeline fails gracefully with clear error messages on migration issues.
+
+Operational Readiness
+
+Documentation is available for:
+
+Adding new migrations
+
+Running Flyway locally
+
+Troubleshooting common issues
+
+No manual database changes are required post-implementation.
+
+Existing application functionality remains unaffected after Flyway integration.
