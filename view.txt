@@ -1,66 +1,23 @@
 Story Title
 
-Design and Implement Flyway Database Migration for Existing Application
+Review Existing CI/CD Pipeline and Flyway Documentation
 
 Description
 
-The existing application currently lacks a standardized and automated database schema migration mechanism, which increases the risk of deployment failures, schema drift across environments, and manual intervention during releases.
+Before implementing Flyway into the application, it is necessary to review the existing CI/CD pipeline and available Flyway documentation to understand the current deployment flow, database handling approach, and integration points.
 
-This story focuses on designing and implementing Flyway as the database migration and version control solution for the application. The work will include creating a solution design, defining migration standards, integrating Flyway into the build and deployment pipelines, and validating schema consistency across all environments.
-
-The outcome will ensure controlled, repeatable, and auditable database changes aligned with CI/CD best practices.
+This story involves analyzing the current pipeline stages, identifying where database migrations can be introduced, reviewing existing Flyway documentation and best practices, and highlighting gaps, risks, or required changes. The outcome will provide clarity and inputs for the Flyway solution design and implementation stories.
 
 Acceptance Criteria
-Solution Design
+Pipeline Review
 
-A documented Flyway solution design is created and reviewed, including:
+Existing CI/CD pipeline stages are reviewed and documented.
 
-Flyway architecture and integration approach
+Current database deployment or change process (if any) is identified.
 
-Database versioning strategy
+Suitable pipeline stage(s) for Flyway execution are identified.
 
-Migration naming conventions
+Pipeline constraints, dependencies, and limitations are documented.
 
-Rollback and repair strategy
+Risks related to database migration integration are captured.
 
-Environment-specific configuration handling
-
-Design is approved by relevant stakeholders (DevOps, DB, Application teams).
-
-Implementation
-
-Flyway is integrated into the existing application repository.
-
-Baseline migration is created for the current database schema.
-
-Existing and new database changes are managed through Flyway versioned migration scripts.
-
-Flyway configuration supports multiple environments (Dev, QA, UAT, Prod).
-
-Flyway execution is automated via CI/CD pipeline (build or release stage).
-
-Flyway validates schema consistency before applying migrations.
-
-Validation & Quality
-
-Database migrations run successfully in lower environments without errors.
-
-Flyway prevents out-of-order or invalid migrations.
-
-Migration history table is created and maintained correctly.
-
-Pipeline fails gracefully with clear error messages on migration issues.
-
-Operational Readiness
-
-Documentation is available for:
-
-Adding new migrations
-
-Running Flyway locally
-
-Troubleshooting common issues
-
-No manual database changes are required post-implementation.
-
-Existing application functionality remains unaffected after Flyway integration.
