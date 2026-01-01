@@ -1,23 +1,7 @@
-Story Title
-
-Review Existing CI/CD Pipeline and Flyway Documentation
-
-Description
-
-Before implementing Flyway into the application, it is necessary to review the existing CI/CD pipeline and available Flyway documentation to understand the current deployment flow, database handling approach, and integration points.
-
-This story involves analyzing the current pipeline stages, identifying where database migrations can be introduced, reviewing existing Flyway documentation and best practices, and highlighting gaps, risks, or required changes. The outcome will provide clarity and inputs for the Flyway solution design and implementation stories.
-
-Acceptance Criteria
-Pipeline Review
-
-Existing CI/CD pipeline stages are reviewed and documented.
-
-Current database deployment or change process (if any) is identified.
-
-Suitable pipeline stage(s) for Flyway execution are identified.
-
-Pipeline constraints, dependencies, and limitations are documented.
-
-Risks related to database migration integration are captured.
-
+- task: PowerShell@2
+  displayName: "Cleanup sources"
+  condition: always()
+  inputs:
+    targetType: 'inline'
+    script: |
+      Remove-Item -Recurse -Force "$(Build.SourcesDirectory)\*" -ErrorAction SilentlyContinue
