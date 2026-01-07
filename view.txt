@@ -1,7 +1,61 @@
-- task: PowerShell@2
-  displayName: "Cleanup sources"
-  condition: always()
-  inputs:
-    targetType: 'inline'
-    script: |
-      Remove-Item -Recurse -Force "$(Build.SourcesDirectory)\*" -ErrorAction SilentlyContinue
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  PYTHON_INSTALLER: 'python-installer.exe'
+  PYTHON_INSTALL_DIR: 'C:\Python'
+
+steps:
+
+# -------------------------------
+# Step 1: Check if Python Exists
+# -------------------------------
+- powershell: |
+    if (Get-Command python -ErrorAction SilentlyContinue) {
+        Write-Host "Python is already installed."
+        Write-Host "##vso[task.setvariable variable=PythonInstalled]true"
+    } else {
+        Write-Host "Python is NOT installed."
+        Write-Host "##vso[task.setvariable variable=PythonInstalled]false"
+    }
+  displayName: 'Check Python Installation'
+
+# --------------------------------
+# Step 2: Download Python from JFrog
+# --------------------------------
+- powershell: |
+    Write-Host "Downloading Python installer from JFrog..."
+    Invoke-WebRequest `
+      -Uri "$(JFROG_URL)" `
+      -OutFile "$(PYTHON_INSTALLER)" `
+      -Headers @{
+          Authorization = "Basic " + `
+          [Convert]::ToBase64String(
+            [Text.Encoding]::ASCII.GetBytes("$(JFROG_USER):$(JFROG_API_KEY)")
+          )
+      }
+  condition: eq(variables['PythonInstalled'], 'false')
+  displayName: 'Download Python Installer from JFrog'
+
+# -------------------------------
+# Step 3: Install Python Silently
+# -------------------------------
+- powershell: |
+    Write-Host "Installing Python..."
+    Start-Process `
+      -FilePath "$(PYTHON_INSTALLER)" `
+      -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 TargetDir=$(PYTHON_INSTALL_DIR)" `
+      -Wait `
+      -NoNewWindow
+  condition: eq(variables['PythonInstalled'], 'false')
+  displayName: 'Install Python'
+
+# -------------------------------
+# Step 4: Verify Python Install
+# -------------------------------
+- powershell: |
+    python --version
+  displayName: 'Verify Python Installation'
