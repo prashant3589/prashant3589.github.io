@@ -1,35 +1,73 @@
-Design and implement an environment-wise SQL build pipeline using Flyway to validate, version, and package database schema changes for Dev / QA / UAT / Prod environments.
+📌 Story Description
 
-The pipeline should:
+Create read-only replica databases for Database X and Database Y to support application and reporting workloads without impacting the primary databases.
 
-Use Flyway to perform SQL validation and dry-run migrations
+The replicas should:
 
-Enforce versioned and repeatable migration standards
+Be kept in sync with the primary databases using an approved replication mechanism
 
-Support environment-specific configuration using pipeline parameters and variable groups
+Follow organizational security and naming standards
 
-Generate a build-ready database artifact (validated migration scripts and Flyway metadata)
+Provide controlled access to a designated service account
 
-Ensure database changes are consistent, traceable, and deployment-ready for downstream release pipelines
+Ensure no disruption to existing production workloads
 
-This pipeline will provide a standardized, repeatable, and auditable process for managing database changes across environments.
-
+This activity will improve scalability, reliability, and security by isolating read workloads from primary databases.
 
 ✅ Acceptance Criteria
-Environment Selection & Configuration
+Replica Creation
 
-The pipeline:
+Read-only replicas are successfully created for:
 
-Accepts an environment parameter (Dev / QA / UAT / Prod)
+Database X
 
-Loads environment-specific values such as:
+Database Y
 
-Database connection placeholders
+Replication method is implemented as per platform standards (e.g., Azure SQL Replica, Always On, transactional replication)
 
-Schema names
+Replicas reflect data from the primary databases with acceptable replication latency
 
-Flyway configuration files
+Replica databases are clearly named following standards
+(Example: X_Replica, Y_Replica)
 
-Uses Azure DevOps Variable Groups or secure variables for sensitive data
+Data Consistency & Validation
 
-No hard-coded environment values exist in SQL scripts
+Data consistency between primary and replica databases is verified
+
+Sample tables and records are validated to confirm successful replication
+
+Replicas are configured as read-only (no write access)
+
+Service Account Access
+
+A designated service account is granted access to:
+
+Database X replica
+
+Database Y replica
+
+Access level is restricted to:
+
+Read-only permissions (e.g., db_datareader)
+
+No write, delete, or schema modification permissions are granted
+
+Security & Compliance
+
+Access follows the principle of least privilege
+
+Credentials for the service account are securely managed
+
+No elevated or admin-level access is granted on replica databases
+
+Connectivity & Usage Validation
+
+The service account:
+
+Can successfully connect to both replica databases
+
+Can execute SELECT queries
+
+Cannot perform INSERT, UPDATE, DELETE, or DDL operations
+
+Application or reporting tools using the service account can read data without errors
