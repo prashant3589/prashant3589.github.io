@@ -1,61 +1,34 @@
-trigger:
-- main
+📌 Story Description
 
-pool:
-  vmImage: 'windows-latest'
+Design and implement an environment-wise Azure DevOps build pipeline for SSIS projects that can compile SSIS solutions and generate ISPAC packages for each target environment (Dev / QA / UAT / Prod).
 
-variables:
-  PYTHON_INSTALLER: 'python-installer.exe'
-  PYTHON_INSTALL_DIR: 'C:\Python'
+The pipeline should:
 
-steps:
+Build SSIS projects using SSDT / MSBuild
 
-# -------------------------------
-# Step 1: Check if Python Exists
-# -------------------------------
-- powershell: |
-    if (Get-Command python -ErrorAction SilentlyContinue) {
-        Write-Host "Python is already installed."
-        Write-Host "##vso[task.setvariable variable=PythonInstalled]true"
-    } else {
-        Write-Host "Python is NOT installed."
-        Write-Host "##vso[task.setvariable variable=PythonInstalled]false"
-    }
-  displayName: 'Check Python Installation'
+Support environment-specific configuration through pipeline variables or variable groups
 
-# --------------------------------
-# Step 2: Download Python from JFrog
-# --------------------------------
-- powershell: |
-    Write-Host "Downloading Python installer from JFrog..."
-    Invoke-WebRequest `
-      -Uri "$(JFROG_URL)" `
-      -OutFile "$(PYTHON_INSTALLER)" `
-      -Headers @{
-          Authorization = "Basic " + `
-          [Convert]::ToBase64String(
-            [Text.Encoding]::ASCII.GetBytes("$(JFROG_USER):$(JFROG_API_KEY)")
-          )
-      }
-  condition: eq(variables['PythonInstalled'], 'false')
-  displayName: 'Download Python Installer from JFrog'
+Generate ISPAC files deterministically
 
-# -------------------------------
-# Step 3: Install Python Silently
-# -------------------------------
-- powershell: |
-    Write-Host "Installing Python..."
-    Start-Process `
-      -FilePath "$(PYTHON_INSTALLER)" `
-      -ArgumentList "/quiet InstallAllUsers=1 PrependPath=1 TargetDir=$(PYTHON_INSTALL_DIR)" `
-      -Wait `
-      -NoNewWindow
-  condition: eq(variables['PythonInstalled'], 'false')
-  displayName: 'Install Python'
+Publish the generated ISPAC files to Azure Artifacts with clear versioning and environment tagging
 
-# -------------------------------
-# Step 4: Verify Python Install
-# -------------------------------
-- powershell: |
-    python --version
-  displayName: 'Verify Python Installation'
+This pipeline will standardize SSIS builds, ensure traceability of artifacts across environments, and enable reliable downstream release/deployment pipelines.
+
+✅ Acceptance Criteria
+Pipeline Configuration
+
+The pipeline accepts an environment parameter (e.g., Dev, QA, UAT, Prod)
+
+Environment selection controls:
+
+Build variables
+
+Configuration files (if applicable)
+
+Artifact naming and versioning
+
+Environment variables are managed via:
+
+Azure DevOps Variable Groups, or
+
+Pipeline parameters with secure variables for secrets
