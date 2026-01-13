@@ -1,34 +1,35 @@
-📌 Story Description
-
-Design and implement an environment-wise Azure DevOps build pipeline for SSIS projects that can compile SSIS solutions and generate ISPAC packages for each target environment (Dev / QA / UAT / Prod).
+Design and implement an environment-wise SQL build pipeline using Flyway to validate, version, and package database schema changes for Dev / QA / UAT / Prod environments.
 
 The pipeline should:
 
-Build SSIS projects using SSDT / MSBuild
+Use Flyway to perform SQL validation and dry-run migrations
 
-Support environment-specific configuration through pipeline variables or variable groups
+Enforce versioned and repeatable migration standards
 
-Generate ISPAC files deterministically
+Support environment-specific configuration using pipeline parameters and variable groups
 
-Publish the generated ISPAC files to Azure Artifacts with clear versioning and environment tagging
+Generate a build-ready database artifact (validated migration scripts and Flyway metadata)
 
-This pipeline will standardize SSIS builds, ensure traceability of artifacts across environments, and enable reliable downstream release/deployment pipelines.
+Ensure database changes are consistent, traceable, and deployment-ready for downstream release pipelines
+
+This pipeline will provide a standardized, repeatable, and auditable process for managing database changes across environments.
+
 
 ✅ Acceptance Criteria
-Pipeline Configuration
+Environment Selection & Configuration
 
-The pipeline accepts an environment parameter (e.g., Dev, QA, UAT, Prod)
+The pipeline:
 
-Environment selection controls:
+Accepts an environment parameter (Dev / QA / UAT / Prod)
 
-Build variables
+Loads environment-specific values such as:
 
-Configuration files (if applicable)
+Database connection placeholders
 
-Artifact naming and versioning
+Schema names
 
-Environment variables are managed via:
+Flyway configuration files
 
-Azure DevOps Variable Groups, or
+Uses Azure DevOps Variable Groups or secure variables for sensitive data
 
-Pipeline parameters with secure variables for secrets
+No hard-coded environment values exist in SQL scripts
