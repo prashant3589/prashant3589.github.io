@@ -1,1 +1,1 @@
-https://learn.microsoft.com/en-us/azure/devops/pipelines/release/approvals/servicenow?view=azure-devops&utm_source=chatgpt.com
+number=$(CHANGE_ID)^active=true^stateINAuthorize,Scheduled,Implement^start_date<=javascript:gs.nowDateTime()^end_date>=javascript:gs.nowDateTime()
