@@ -1,7 +1,31 @@
 number=$(CHANGE_ID)^active=true^stateINAuthorize,Scheduled,Implement^start_date<=javascript:gs.nowDateTime()^end_date>=javascript:gs.nowDateTime()
 
 
-GET https://dev12345.service-now.com/api/now/table/change_request
-Authorization: Basic {{auth}}
-Accept: application/json
-@auth = base64(username:password)
+- task: PowerShell@2
+  displayName: "Validate ServiceNow Change (Read-Only)"
+  inputs:
+    targetType: inline
+    script: |
+      $changeId = "$(CHANGE_ID)"
+      $instance = "https://<instance>.service-now.com"
+
+      $query = "number=$changeId^active=true^stateIN1,3,4^planned_start_date<=@now^planned_end_date>=@now"
+      $url = "$instance/api/now/table/change_request?sysparm_query=$query&sysparm_limit=1"
+
+      $authPair = "$(SN_USER):$(SN_PASSWORD)"
+      $authBytes = [Text.Encoding]::ASCII.GetBytes($authPair)
+      $auth = [Convert]::ToBase64String($authBytes)
+
+      $headers = @{
+        Authorization = "Basic $auth"
+        Accept = "application/json"
+      }
+
+      $response = Invoke-RestMethod -Method GET -Uri $url -Headers $headers
+
+      if ($response.result.Count -eq 0) {
+          Write-Error "❌ Change validation failed: No valid change found"
+      }
+
+      Write-Host "✅ Change validated successfully: $changeId"
+
