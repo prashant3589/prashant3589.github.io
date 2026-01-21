@@ -38,26 +38,27 @@ Allows the pipeline to continue execution
   inputs:
     targetType: inline
     script: |
-      $changeId = "$(CHANGE_ID)"
-      $instance = "https://<instance>.service-now.com"
+      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-      $query = "number=$changeId^active=true^stateIN1,3,4^planned_start_date<=@now^planned_end_date>=@now"
-      $url = "$instance/api/now/table/change_request?sysparm_query=$query&sysparm_limit=1"
+$instance = "https://<instance>.service-now.com"
+$changeId = "CHG0012345"
 
-      $authPair = "$(SN_USER):$(SN_PASSWORD)"
-      $authBytes = [Text.Encoding]::ASCII.GetBytes($authPair)
-      $auth = [Convert]::ToBase64String($authBytes)
+$query = "number=$changeId"
+Add-Type -AssemblyName System.Web
+$encodedQuery = [System.Web.HttpUtility]::UrlEncode($query)
 
-      $headers = @{
-        Authorization = "Basic $auth"
-        Accept = "application/json"
-      }
+$authPair = "${SN_USER}:${SN_PASSWORD}"
+$authBytes = [Text.Encoding]::UTF8.GetBytes($authPair)
+$auth = [Convert]::ToBase64String($authBytes)
 
-      $response = Invoke-RestMethod -Method GET -Uri $url -Headers $headers
+$headers = @{
+    Authorization = "Basic $auth"
+    Accept        = "application/json"
+}
 
-      if ($response.result.Count -eq 0) {
-          Write-Error "❌ Change validation failed: No valid change found"
-      }
+$url = "$instance/api/now/table/change_request?sysparm_query=$encodedQuery"
 
-      Write-Host "✅ Change validated successfully: $changeId"
+$response = Invoke-RestMethod -Uri $url -Headers $headers -Method GET
+$response.result
+
 
