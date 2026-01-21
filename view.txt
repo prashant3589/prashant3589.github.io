@@ -61,4 +61,11 @@ $url = "$instance/api/now/table/change_request?sysparm_query=$encodedQuery"
 $response = Invoke-RestMethod -Uri $url -Headers $headers -Method GET
 $response.result
 
+$baseUrl = "https://<instance>.service-now.com/api/now/table/change_request"
+
+$uriBuilder = [System.UriBuilder]$baseUrl
+$uriBuilder.Query = "sysparm_query=number=CHG0012345^active=true&sysparm_limit=1"
+
+$response = Invoke-RestMethod -Uri $uriBuilder.Uri -Headers $headers
+
 
