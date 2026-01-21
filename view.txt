@@ -1,71 +1,24 @@
-number=$(CHANGE_ID)^active=true^stateINAuthorize,Scheduled,Implement^start_date<=javascript:gs.nowDateTime()^end_date>=javascript:gs.nowDateTime()
+# Convert ServiceNow dates to DateTime (UTC)
+$plannedStart = [DateTime]::Parse($planned_start_date).ToUniversalTime()
+$plannedEnd   = [DateTime]::Parse($planned_end_date).ToUniversalTime()
+$currentTime  = (Get-Date).ToUniversalTime()
 
-This PowerShell script performs read-only validation of a ServiceNow Change Request before allowing a deployment to proceed.
+# Allowed states
+$allowedStates = @("Scheduled", "Implement")
 
-The script accepts the following inputs:
-
-Change ID – the ServiceNow change request number to validate (e.g., CHG0012345)
-
-Instance ID – the ServiceNow instance URL (e.g., https://dev12345.service-now.com)
-
-Status – the list of allowed change states for deployment (e.g., New, Authorize, Scheduled)
-
-Using these inputs, the script queries the ServiceNow Change Request table via the Table REST API and validates that:
-
-The specified change request exists
-
-The change request is active
-
-The change request is in one of the allowed states
-
-The current date and time falls within the approved change window (planned start and end dates)
-
-The script performs the validation using a GET-only REST call, ensuring no updates are made to the change record.
-
-If any validation criteria fails, the script:
-
-Throws a descriptive error
-
-Causes the Azure DevOps pipeline task to fail
-
-If all validation criteria pass, the script:
-
-Logs a success message
-
-Allows the pipeline to continue execution
-- task: PowerShell@2
-  displayName: "Validate ServiceNow Change (Read-Only)"
-  inputs:
-    targetType: inline
-    script: |
-      [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-
-$instance = "https://<instance>.service-now.com"
-$changeId = "CHG0012345"
-
-$query = "number=$changeId"
-Add-Type -AssemblyName System.Web
-$encodedQuery = [System.Web.HttpUtility]::UrlEncode($query)
-
-$authPair = "${SN_USER}:${SN_PASSWORD}"
-$authBytes = [Text.Encoding]::UTF8.GetBytes($authPair)
-$auth = [Convert]::ToBase64String($authBytes)
-
-$headers = @{
-    Authorization = "Basic $auth"
-    Accept        = "application/json"
+# ---- Date Validation ----
+if ($currentTime -lt $plannedStart -or $currentTime -gt $plannedEnd) {
+    Write-Error "❌ Validation failed: Current time ($currentTime) is outside the approved change window ($plannedStart - $plannedEnd)."
+    exit 1
 }
 
-$url = "$instance/api/now/table/change_request?sysparm_query=$encodedQuery"
+# ---- State Validation ----
+if ($allowedStates -notcontains $state) {
+    Write-Error "❌ Validation failed: Change state '$state' is not allowed. Allowed states: Scheduled, Implement."
+    exit 1
+}
 
-$response = Invoke-RestMethod -Uri $url -Headers $headers -Method GET
-$response.result
-
-$baseUrl = "https://<instance>.service-now.com/api/now/table/change_request"
-
-$uriBuilder = [System.UriBuilder]$baseUrl
-$uriBuilder.Query = "sysparm_query=number=CHG0012345^active=true&sysparm_limit=1"
-
-$response = Invoke-RestMethod -Uri $uriBuilder.Uri -Headers $headers
-
-
+Write-Host "✅ Change validation passed."
+Write-Host "State        : $state"
+Write-Host "Start (UTC)  : $plannedStart"
+Write-Host "End (UTC)    : $plannedEnd"
