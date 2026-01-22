@@ -39,3 +39,65 @@ function Convert-ToDate {
         [System.Globalization.CultureInfo]::InvariantCulture
     )
 }
+
+function Invoke-RestApiSafe {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$Uri,
+
+        [Parameter()]
+        [ValidateSet("GET","POST","PUT","PATCH","DELETE")]
+        [string]$Method = "GET",
+
+        [Parameter()]
+        [hashtable]$Headers = @{}, 
+
+        [Parameter()]
+        [object]$Body = $null,
+
+        [Parameter()]
+        [int]$TimeoutSec = 60
+    )
+
+    try {
+        Write-Host "➡️ Calling API: $Method $Uri"
+
+        $params = @{
+            Uri         = $Uri
+            Method      = $Method
+            Headers     = $Headers
+            TimeoutSec  = $TimeoutSec
+            ErrorAction = "Stop"
+        }
+
+        if ($Body) {
+            $params.Body        = ($Body | ConvertTo-Json -Depth 10)
+            $params.ContentType = "application/json"
+        }
+
+        $response = Invoke-RestMethod @params
+        return $response
+    }
+    catch {
+        Write-Error "❌ REST API call failed"
+
+        if ($_.Exception.Response) {
+            $statusCode = $_.Exception.Response.StatusCode.value__
+            $statusDesc = $_.Exception.Response.StatusDescription
+
+            Write-Error "HTTP Status: $statusCode $statusDesc"
+
+            try {
+                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
+                $errorBody = $reader.ReadToEnd()
+                Write-Error "Response Body: $errorBody"
+            } catch {}
+        }
+        else {
+            Write-Error $_.Exception.Message
+        }
+
+        throw  # fail the pipeline
+    }
+}
+
