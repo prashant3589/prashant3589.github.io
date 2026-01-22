@@ -22,3 +22,20 @@ Write-Host "✅ Change validation passed."
 Write-Host "State        : $state"
 Write-Host "Start (UTC)  : $plannedStart"
 Write-Host "End (UTC)    : $plannedEnd"
+
+
+
+
+
+function Convert-ToDate {
+    param (
+        [Parameter(Mandatory = $true)]
+        [string]$RawDate
+    )
+
+    return [DateTime]::ParseExact(
+        $RawDate,
+        "dd/MM/yyyy",
+        [System.Globalization.CultureInfo]::InvariantCulture
+    )
+}
