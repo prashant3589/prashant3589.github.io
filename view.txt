@@ -1,52 +1,36 @@
 Jira Story Summary
 
-Implement ServiceNow Change Request validation in Azure DevOps pipeline using Environment approvals for Production and Pre-Production deployments
+Implement Azure DevOps pipeline to generate database migration scripts using Flyway
 
 Description
 
-Azure DevOps pipelines currently allow deployments to proceed without automated validation of ServiceNow Change Requests (CRs), which creates a gap in enforcing ITSM change-management controls.
+Currently, database schema changes are created and managed manually, which leads to inconsistencies, lack of traceability, and increased risk during deployments.
 
-As part of this story, Azure DevOps Environment approvals and checks will be configured to integrate with ServiceNow Change Management, ensuring that deployments are validated against ServiceNow before execution.
+This story aims to implement an Azure DevOps pipeline that uses Flyway to automatically generate database migration scripts in a standardized, version-controlled manner. The pipeline will ensure that all database changes follow a consistent naming convention, are validated before execution, and are stored in source control for audit and rollback purposes.
+
+The pipeline will support generating Flyway-compliant migration scripts based on user input and environment configuration, without directly applying changes to the database.
 
 Scope of Implementation
 
-Production Environment
+Use Flyway CLI to generate migration scripts
 
-During the approval stage, the approver must provide a ServiceNow Change Request number.
+Enforce Flyway naming and versioning standards
 
-The pipeline must validate the Change Request against ServiceNow to ensure:
+Generate SQL migration files in a controlled repository location
 
-The Change Request exists
+Support environment-specific configuration
 
-The Change Request is active
-
-The Change Request is approved
-
-The OS Service / Application field in ServiceNow matches the deploying application
-
-Pre-Production Environment
-
-The pipeline must validate the Change Request against ServiceNow using a predefined set of allowed statuses (e.g., New, Assess, Authorized).
-
-Approval should not require a fully approved change but must ensure the change is valid and relevant.
-
-The validation must be enforced automatically and block deployments if criteria are not met.
-
-This implementation ensures consistent enforcement of change-management policies and improves audit readiness across environments.
+Validate migration structure before publishing scripts
 
 Acceptance Criteria
-Production Validation
+Pipeline Execution
 
- Pipeline prompts the approver to enter a ServiceNow Change Request number during the Environment approval stage
+ Pipeline can be triggered manually or via commit
 
- Pipeline validates the Change Request exists in ServiceNow
+ Pipeline uses Flyway CLI (Community/Enterprise as applicable)
 
- Pipeline validates the Change Request is active
+ Pipeline generates a new Flyway migration script without applying it to the database
 
- Pipeline validates the Change Request is in an approved / implementable state
+ Generated scripts follow Flyway naming conventions
 
- Pipeline validates the OS Service / Application field in ServiceNow matches the target application
-
- Deployment proceeds only if all validations pass
-
- Deployment is blocked with a clear failure message if validation fails
+Example: V<version>__<description>.sql
