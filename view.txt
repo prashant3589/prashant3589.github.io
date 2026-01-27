@@ -1,36 +1,28 @@
 Jira Story Summary
 
-Implement Azure DevOps pipeline to generate database migration scripts using Flyway
+Create Confluence documentation for Azure DevOps–ServiceNow Change Request validation using Environment approvals
 
 Description
 
-Currently, database schema changes are created and managed manually, which leads to inconsistencies, lack of traceability, and increased risk during deployments.
+To ensure consistent adoption, maintainability, and audit readiness of the Azure DevOps and ServiceNow Change Request validation integration, comprehensive documentation needs to be created in Confluence.
 
-This story aims to implement an Azure DevOps pipeline that uses Flyway to automatically generate database migration scripts in a standardized, version-controlled manner. The pipeline will ensure that all database changes follow a consistent naming convention, are validated before execution, and are stored in source control for audit and rollback purposes.
+This documentation will describe how Azure DevOps pipelines enforce ServiceNow Change Request (CR) validation using Environment approvals and checks, including:
 
-The pipeline will support generating Flyway-compliant migration scripts based on user input and environment configuration, without directly applying changes to the database.
+Capturing Change Request number as user input during the approval step
 
-Scope of Implementation
+Validating the Change Request against ServiceNow
 
-Use Flyway CLI to generate migration scripts
+Enforcing application-level validation using the OS Service / Application field
 
-Enforce Flyway naming and versioning standards
+Supporting environment-specific validation rules, especially for Pre-Production deployments
 
-Generate SQL migration files in a controlled repository location
-
-Support environment-specific configuration
-
-Validate migration structure before publishing scripts
+The Confluence page will serve as a single source of truth for development teams, approvers, support teams, and auditors.
 
 Acceptance Criteria
-Pipeline Execution
+Documentation Scope & Content
 
- Pipeline can be triggered manually or via commit
+ A Confluence page is created under the agreed space (e.g., DevOps / CI-CD Standards)
 
- Pipeline uses Flyway CLI (Community/Enterprise as applicable)
+ Page clearly explains the problem statement and business requirement
 
- Pipeline generates a new Flyway migration script without applying it to the database
-
- Generated scripts follow Flyway naming conventions
-
-Example: V<version>__<description>.sql
+ Page documents the end-to-end validation flow between Azure DevOps and ServiceNow
