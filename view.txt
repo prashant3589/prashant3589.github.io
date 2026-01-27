@@ -1,103 +1,52 @@
-# Convert ServiceNow dates to DateTime (UTC)
-$plannedStart = [DateTime]::Parse($planned_start_date).ToUniversalTime()
-$plannedEnd   = [DateTime]::Parse($planned_end_date).ToUniversalTime()
-$currentTime  = (Get-Date).ToUniversalTime()
+Jira Story Summary
 
-# Allowed states
-$allowedStates = @("Scheduled", "Implement")
+Implement ServiceNow Change Request validation in Azure DevOps pipeline using Environment approvals for Production and Pre-Production deployments
 
-# ---- Date Validation ----
-if ($currentTime -lt $plannedStart -or $currentTime -gt $plannedEnd) {
-    Write-Error "❌ Validation failed: Current time ($currentTime) is outside the approved change window ($plannedStart - $plannedEnd)."
-    exit 1
-}
+Description
 
-# ---- State Validation ----
-if ($allowedStates -notcontains $state) {
-    Write-Error "❌ Validation failed: Change state '$state' is not allowed. Allowed states: Scheduled, Implement."
-    exit 1
-}
+Azure DevOps pipelines currently allow deployments to proceed without automated validation of ServiceNow Change Requests (CRs), which creates a gap in enforcing ITSM change-management controls.
 
-Write-Host "✅ Change validation passed."
-Write-Host "State        : $state"
-Write-Host "Start (UTC)  : $plannedStart"
-Write-Host "End (UTC)    : $plannedEnd"
+As part of this story, Azure DevOps Environment approvals and checks will be configured to integrate with ServiceNow Change Management, ensuring that deployments are validated against ServiceNow before execution.
 
+Scope of Implementation
 
+Production Environment
 
+During the approval stage, the approver must provide a ServiceNow Change Request number.
 
+The pipeline must validate the Change Request against ServiceNow to ensure:
 
-function Convert-ToDate {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$RawDate
-    )
+The Change Request exists
 
-    return [DateTime]::ParseExact(
-        $RawDate,
-        "dd/MM/yyyy",
-        [System.Globalization.CultureInfo]::InvariantCulture
-    )
-}
+The Change Request is active
 
-function Invoke-RestApiSafe {
-    param (
-        [Parameter(Mandatory = $true)]
-        [string]$Uri,
+The Change Request is approved
 
-        [Parameter()]
-        [ValidateSet("GET","POST","PUT","PATCH","DELETE")]
-        [string]$Method = "GET",
+The OS Service / Application field in ServiceNow matches the deploying application
 
-        [Parameter()]
-        [hashtable]$Headers = @{}, 
+Pre-Production Environment
 
-        [Parameter()]
-        [object]$Body = $null,
+The pipeline must validate the Change Request against ServiceNow using a predefined set of allowed statuses (e.g., New, Assess, Authorized).
 
-        [Parameter()]
-        [int]$TimeoutSec = 60
-    )
+Approval should not require a fully approved change but must ensure the change is valid and relevant.
 
-    try {
-        Write-Host "➡️ Calling API: $Method $Uri"
+The validation must be enforced automatically and block deployments if criteria are not met.
 
-        $params = @{
-            Uri         = $Uri
-            Method      = $Method
-            Headers     = $Headers
-            TimeoutSec  = $TimeoutSec
-            ErrorAction = "Stop"
-        }
+This implementation ensures consistent enforcement of change-management policies and improves audit readiness across environments.
 
-        if ($Body) {
-            $params.Body        = ($Body | ConvertTo-Json -Depth 10)
-            $params.ContentType = "application/json"
-        }
+Acceptance Criteria
+Production Validation
 
-        $response = Invoke-RestMethod @params
-        return $response
-    }
-    catch {
-        Write-Error "❌ REST API call failed"
+ Pipeline prompts the approver to enter a ServiceNow Change Request number during the Environment approval stage
 
-        if ($_.Exception.Response) {
-            $statusCode = $_.Exception.Response.StatusCode.value__
-            $statusDesc = $_.Exception.Response.StatusDescription
+ Pipeline validates the Change Request exists in ServiceNow
 
-            Write-Error "HTTP Status: $statusCode $statusDesc"
+ Pipeline validates the Change Request is active
 
-            try {
-                $reader = New-Object System.IO.StreamReader($_.Exception.Response.GetResponseStream())
-                $errorBody = $reader.ReadToEnd()
-                Write-Error "Response Body: $errorBody"
-            } catch {}
-        }
-        else {
-            Write-Error $_.Exception.Message
-        }
+ Pipeline validates the Change Request is in an approved / implementable state
 
-        throw  # fail the pipeline
-    }
-}
+ Pipeline validates the OS Service / Application field in ServiceNow matches the target application
 
+ Deployment proceeds only if all validations pass
+
+ Deployment is blocked with a clear failure message if validation fails
