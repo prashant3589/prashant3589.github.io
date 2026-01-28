@@ -1,28 +1,12 @@
-Jira Story Summary
+          - task: PowerShell@2
+            displayName: Validate Change ID
+            inputs:
+              targetType: 'inline'
+              script: |
+                $changeId = "$(CHANGE_ID)"
 
-Create Confluence documentation for Azure DevOps–ServiceNow Change Request validation using Environment approvals
+                if ([string]::IsNullOrWhiteSpace($changeId)) {
+                    Write-Error "CHANGE_ID is mandatory. Please enter it during approval."
+                }
 
-Description
-
-To ensure consistent adoption, maintainability, and audit readiness of the Azure DevOps and ServiceNow Change Request validation integration, comprehensive documentation needs to be created in Confluence.
-
-This documentation will describe how Azure DevOps pipelines enforce ServiceNow Change Request (CR) validation using Environment approvals and checks, including:
-
-Capturing Change Request number as user input during the approval step
-
-Validating the Change Request against ServiceNow
-
-Enforcing application-level validation using the OS Service / Application field
-
-Supporting environment-specific validation rules, especially for Pre-Production deployments
-
-The Confluence page will serve as a single source of truth for development teams, approvers, support teams, and auditors.
-
-Acceptance Criteria
-Documentation Scope & Content
-
- A Confluence page is created under the agreed space (e.g., DevOps / CI-CD Standards)
-
- Page clearly explains the problem statement and business requirement
-
- Page documents the end-to-end validation flow between Azure DevOps and ServiceNow
+                Write-Host "Change ID received from approver: $changeId"
