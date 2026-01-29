@@ -1,12 +1,2 @@
-          - task: PowerShell@2
-            displayName: Validate Change ID
-            inputs:
-              targetType: 'inline'
-              script: |
-                $changeId = "$(CHANGE_ID)"
-
-                if ([string]::IsNullOrWhiteSpace($changeId)) {
-                    Write-Error "CHANGE_ID is mandatory. Please enter it during approval."
-                }
-
-                Write-Host "Change ID received from approver: $changeId"
+SELECT servicename, service_account
+FROM sys.dm_server_services;
