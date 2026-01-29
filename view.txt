@@ -1,2 +1,18 @@
-SELECT servicename, service_account
-FROM sys.dm_server_services;
+parameters:
+- name: database
+  displayName: Select database
+  type: string
+  default: customerdb
+  values:
+    - customerdb
+    - orderdb
+    - invoicedb
+
+- name: environment
+  displayName: Environment
+  type: string
+  default: DEV
+  values:
+    - DEV
+    - QA
+    - PROD
