@@ -1,4 +1,7 @@
-SELECT STRING_AGG(QUOTENAME(s.name) + '.' + QUOTENAME(t.name), ', ')
-FROM sys.tables t
-JOIN sys.schemas s ON t.schema_id = s.schema_id
-ORDER BY s.name, t.name;
+SELECT STUFF((
+    SELECT ', [' + s.name + '].[' + t.name + ']'
+    FROM sys.tables t
+    JOIN sys.schemas s ON t.schema_id = s.schema_id
+    ORDER BY s.name, t.name
+    FOR XML PATH(''), TYPE
+).value('.', 'NVARCHAR(MAX)'), 1, 2, '');
