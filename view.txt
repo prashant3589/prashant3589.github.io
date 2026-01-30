@@ -1,18 +1,4 @@
-parameters:
-- name: database
-  displayName: Select database
-  type: string
-  default: customerdb
-  values:
-    - customerdb
-    - orderdb
-    - invoicedb
-
-- name: environment
-  displayName: Environment
-  type: string
-  default: DEV
-  values:
-    - DEV
-    - QA
-    - PROD
+SELECT STRING_AGG(QUOTENAME(s.name) + '.' + QUOTENAME(t.name), ', ')
+FROM sys.tables t
+JOIN sys.schemas s ON t.schema_id = s.schema_id
+ORDER BY s.name, t.name;
