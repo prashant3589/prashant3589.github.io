@@ -1,3 +1,19 @@
+$allowedStatesByEnv = @{
+    PPE  = @("Assess", "Schedule", "Implement")
+    PROD = @("Schedule", "Implement")
+}
+
+$environment = $environment.ToUpper()   # normalize
+
+if (-not $allowedStatesByEnv.ContainsKey($environment)) {
+    throw "Unsupported environment: $environment"
+}
+
+$allowedState = $allowedStatesByEnv[$environment]
+
+
+
+
 - task: PowerShell@2
   displayName: "Commit Flyway migration scripts"
   inputs:
