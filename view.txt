@@ -1,7 +1,23 @@
-SELECT STUFF((
-    SELECT ', [' + s.name + '].[' + t.name + ']'
-    FROM sys.tables t
-    JOIN sys.schemas s ON t.schema_id = s.schema_id
-    ORDER BY s.name, t.name
-    FOR XML PATH(''), TYPE
-).value('.', 'NVARCHAR(MAX)'), 1, 2, '');
+- task: PowerShell@2
+  displayName: "Commit Flyway migration scripts"
+  inputs:
+    targetType: inline
+    script: |
+      cd "$(Build.SourcesDirectory)"
+
+      git status
+
+      git add db/**/sql/*.sql
+
+      # Check if there is anything to commit
+      $changes = git status --porcelain
+      if (-not $changes) {
+        Write-Host "No migration changes to commit"
+        exit 0
+      }
+
+      git config user.email "ado-pipeline@company.com"
+      git config user.name "Azure DevOps Pipeline"
+
+      git commit -m "Auto-generated Flyway migration from pipeline $(Build.BuildNumber)"
+      git push origin HEAD:$(Build.SourceBranchName)
