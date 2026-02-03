@@ -1,15 +1,8 @@
-$allowedStatesByEnv = @{
-    PPE  = @("Assess", "Schedule", "Implement")
-    PROD = @("Schedule", "Implement")
+$conflict = $allowedState | Where-Object { $restrictedState -contains $_ }
+
+if ($conflict.Count -gt 0) {
+    throw "Invalid configuration. These states are both allowed and restricted: $($conflict -join ', ')"
 }
-
-$environment = $environment.ToUpper()   # normalize
-
-if (-not $allowedStatesByEnv.ContainsKey($environment)) {
-    throw "Unsupported environment: $environment"
-}
-
-$allowedState = $allowedStatesByEnv[$environment]
 
 
 
