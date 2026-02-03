@@ -1,27 +1,219 @@
-Problem Statement
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Azure DevOps – ServiceNow Change Validation Integration</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+      color: #172B4D;
+    }
+    h1 {
+      font-size: 28px;
+      border-bottom: 2px solid #0052CC;
+      padding-bottom: 6px;
+    }
+    h2 {
+      font-size: 22px;
+      margin-top: 28px;
+      color: #0052CC;
+    }
+    h3 {
+      font-size: 18px;
+      margin-top: 20px;
+    }
+    ul {
+      margin-left: 20px;
+    }
+    li {
+      margin-bottom: 6px;
+    }
+    .outcome {
+      margin-left: 20px;
+    }
+  </style>
+</head>
+<body>
 
-Currently, Azure DevOps YAML pipelines do not provide a native mechanism to validate ServiceNow Change Requests (CRs) as part of the deployment process. As a result, production deployments can proceed without verifying whether:
+<h1>Azure DevOps – ServiceNow Change Validation Integration</h1>
 
-A valid Change Request exists in ServiceNow
+<h2>1. Overview</h2>
+<p>
+This document describes the Azure DevOps (ADO) – ServiceNow integration implemented to validate
+Change Requests during deployment pipelines. The validation logic is centralized using a
+PowerShell script library, which is invoked from pattern-based YAML pipelines.
+</p>
+<p>
+The solution ensures governance, compliance, and environment-specific controls before
+deployments proceed.
+</p>
 
-The Change Request is active
+<h2>2. High-Level Architecture</h2>
 
-The Change Request is approved and in an implementable state
+<h3>Key Components</h3>
+<ul>
+  <li>Azure DevOps YAML Pipeline (Pattern-based)</li>
+  <li>Centralized PowerShell Script Library (shared repo)</li>
+  <li>ADO Variable Group (stores Change Request ID)</li>
+  <li>ServiceNow Change Management API</li>
+</ul>
 
-This gap introduces several challenges:
+<h3>Flow</h3>
+<ol>
+  <li>Developer triggers deployment pipeline.</li>
+  <li>Pipeline reads Change Request ID from Variable Group.</li>
+  <li>YAML pipeline calls centralized PowerShell script from library repo.</li>
+  <li>PowerShell script queries ServiceNow.</li>
+  <li>Change Request is validated across three deployment stages.</li>
+  <li>Pipeline proceeds or fails based on validation result.</li>
+</ol>
 
-Non-compliance with ITSM and change-management policies
+<h2>3. Centralized PowerShell Script Library</h2>
 
-Audit and governance risks, as deployments may occur without an approved CR
+<h3>Purpose</h3>
+<ul>
+  <li>Maintain single source of truth for Change validation logic</li>
+  <li>Avoid script duplication across pipelines</li>
+  <li>Enable controlled updates and reuse</li>
+</ul>
 
-Manual validation, which is error-prone and difficult to enforce consistently
+<h3>Location</h3>
+<ul>
+  <li>Stored in a central repository (library repo)</li>
+  <li>Downloaded during pipeline execution</li>
+</ul>
 
-Lack of centralized control, especially when multiple pipelines deploy to production
+<h3>Invocation Pattern</h3>
+<p>
+Pattern YAML files reference the PowerShell script using repository checkout and template inclusion.
+</p>
 
-Without an automated validation mechanism, enforcing ServiceNow change governance relies heavily on manual checks and process adherence rather than technical enforcement.
+<h2>4. Change Request Configuration</h2>
 
-Solution Overview
+<h3>Variable Group</h3>
+<ul>
+  <li><strong>Variable Name:</strong> CHANGE_ID</li>
+  <li><strong>Source:</strong> Azure DevOps Library → Variable Group</li>
+  <li><strong>Usage:</strong> Passed automatically to PowerShell script</li>
+</ul>
 
-To address this limitation, Azure DevOps Environments with ServiceNow Change Management integration are used to enforce pre-deployment validation of ServiceNow Change Requests.
+<p>
+This ensures the Change ID is configurable without modifying pipeline code.
+</p>
 
-Azure DevOps provides the capability to configure approvals and checks at the Environment level, which are executed before a deployment job is allowed to start. By integrating the ServiceNow Change Management extension, the pipeline can automatically validate the Change Request against ServiceNow using predefined criteria.
+<h2>5. Validation Stages</h2>
+<p>
+The PowerShell script validates the Change Request at three logical stages.
+</p>
+
+<h3>5.1 Stage 1 – Change Window Validation</h3>
+<p><strong>Objective:</strong> Ensure the Change Request is within its approved implementation window.</p>
+
+<h4>Validation Rules</h4>
+<ul>
+  <li>Current deployment time must fall between:</li>
+  <ul>
+    <li>planned_start_date</li>
+    <li>planned_end_date</li>
+  </ul>
+  <li>If outside the window, validation fails.</li>
+</ul>
+
+<div class="outcome">
+  <p><strong>Outcome:</strong></p>
+  <p>❌ Deployment blocked if change window is invalid</p>
+  <p>✅ Deployment proceeds if window is valid</p>
+</div>
+
+<h3>5.2 Stage 2 – Change State Validation</h3>
+<p><strong>Objective:</strong> Ensure the Change Request is in an allowed state based on environment.</p>
+
+<h4>Environment-Specific Rules</h4>
+
+<p><strong>Pre-Production (PPE / Preprod)</strong></p>
+<ul>
+  <li>New</li>
+  <li>Assess</li>
+  <li>Authorize</li>
+  <li>Scheduled</li>
+  <li>Implement</li>
+</ul>
+
+<p><strong>Production (PROD)</strong></p>
+<ul>
+  <li>Scheduled</li>
+  <li>Implement</li>
+</ul>
+
+<h4>Explicitly Restricted States (All Environments)</h4>
+<p>
+If Change state is any of the following, validation fails immediately:
+</p>
+<ul>
+  <li>Canceled</li>
+  <li>Completed</li>
+</ul>
+
+<div class="outcome">
+  <p><strong>Outcome:</strong></p>
+  <p>❌ Pipeline fails for invalid or restricted states</p>
+  <p>✅ Pipeline proceeds for allowed states</p>
+</div>
+
+<h3>5.3 Stage 3 – Business Service Validation</h3>
+<p><strong>Objective:</strong> Ensure the Change Request belongs to the correct Business Service.</p>
+
+<h4>Validation Rules</h4>
+<ul>
+  <li>Change Request business_service must match the service configured for the application</li>
+  <li>Mismatch results in failure</li>
+</ul>
+
+<div class="outcome">
+  <p><strong>Outcome:</strong></p>
+  <p>❌ Deployment blocked if Business Service does not match</p>
+  <p>✅ Deployment proceeds if service matches</p>
+</div>
+
+<h2>6. Error Handling & Pipeline Behavior</h2>
+<ul>
+  <li>PowerShell script uses controlled <code>throw</code> statements</li>
+  <li>Any validation failure:</li>
+  <ul>
+    <li>Fails the task</li>
+    <li>Stops pipeline execution</li>
+    <li>Displays clear, single error message</li>
+  </ul>
+</ul>
+
+<p>
+This avoids noisy logs and ensures clear feedback to developers.
+</p>
+
+<h2>7. Benefits of This Design</h2>
+<ul>
+  <li>✅ Centralized validation logic</li>
+  <li>✅ Environment-aware governance</li>
+  <li>✅ Reduced pipeline duplication</li>
+  <li>✅ Easy audit and compliance</li>
+  <li>✅ Safe production deployments</li>
+</ul>
+
+<h2>8. Future Enhancements (Optional)</h2>
+<ul>
+  <li>Support for emergency change types</li>
+  <li>Approval-based dynamic Change ID input</li>
+  <li>Multi-service Change validation</li>
+  <li>Enhanced logging back to ServiceNow</li>
+</ul>
+
+<h2>9. Summary</h2>
+<p>
+This ADO–ServiceNow integration enforces strong deployment governance by validating Change Requests
+through a centralized PowerShell library. Environment-specific rules, business service checks,
+and change window enforcement ensure that only compliant deployments reach production.
+</p>
+
+</body>
+</html>
