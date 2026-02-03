@@ -1,9 +1,15 @@
-$conflict = $allowedState | Where-Object { $restrictedState -contains $_ }
+- powershell: |
+    $env:FLYWAY_LICENSE_KEY_FILE = "$(flywayPermit.secureFilePath)"
+    flyway auth info
+  displayName: 'Verify Flyway License'
 
-if ($conflict.Count -gt 0) {
-    throw "Invalid configuration. These states are both allowed and restricted: $($conflict -join ', ')"
-}
-
+- powershell: |
+    flyway generate baseline `
+      -url="$(DB_URL)" `
+      -user="$(DB_USER)" `
+      -password="$(DB_PASSWORD)" `
+      -locations="filesystem:$(Build.SourcesDirectory)/migrations"
+  displayName: 'Generate baseline'
 
 
 
