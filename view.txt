@@ -13,6 +13,29 @@
 
 
 
+# ================================
+# Flyway Enterprise Setup Script
+# ================================
+
+# 1. Set Flyway authentication environment variables
+$env:FLYWAY_EMAIL = "<your.email@company.com>"
+$env:FLYWAY_I_AGREE_TO_EULA = "true"
+
+# Optional but recommended
+$env:FLYWAY_TELEMETRY_ENABLED = "false"
+
+# 2. Login using access token
+flyway auth login --access-token "<YOUR_ACCESS_TOKEN>"
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Flyway authentication failed"
+    exit 1
+}
+
+# 3. Verify Flyway edition
+flyway -v
+
+
 - task: PowerShell@2
   displayName: "Commit Flyway migration scripts"
   inputs:
