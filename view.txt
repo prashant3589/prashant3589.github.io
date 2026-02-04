@@ -13,27 +13,11 @@
 
 
 
-# ================================
-# Flyway Enterprise Setup Script
-# ================================
+$base64 = ""
+$bytes = [Convert]::FromBase64String($base64)
+$text = [System.Text.Encoding]::UTF8.GetString($bytes)
+$text
 
-# 1. Set Flyway authentication environment variables
-$env:FLYWAY_EMAIL = "<your.email@company.com>"
-$env:FLYWAY_I_AGREE_TO_EULA = "true"
-
-# Optional but recommended
-$env:FLYWAY_TELEMETRY_ENABLED = "false"
-
-# 2. Login using access token
-flyway auth login --access-token "<YOUR_ACCESS_TOKEN>"
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Error "Flyway authentication failed"
-    exit 1
-}
-
-# 3. Verify Flyway edition
-flyway -v
 
 
 - task: PowerShell@2
