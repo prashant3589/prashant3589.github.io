@@ -1,3 +1,17 @@
 SELECT 
     @@SERVERNAME + '_' + name AS Server_DB_Name
 FROM sys.databases;
+
+$csv = Get-Content "C:\temp\db_list.csv"
+$root = "C:\temp\FlywayFolders"
+$files = "pattern_flyway_sql.yaml","variables.yaml","variables_DEV.yaml","variables_SYS.yaml","variables_PPE.yaml","variables_PROD.yaml"
+
+foreach ($db in $csv) {
+    $path = Join-Path $root $db
+    New-Item -ItemType Directory -Path $path -Force
+
+    foreach ($f in $files) {
+        New-Item -ItemType File -Path (Join-Path $path $f) -Force
+    }
+}
+
