@@ -1,2 +1,99 @@
- $env:GIT_TERMINAL_PROMPT="0"
-  git -c http.extraheader="AUTHORIZATION: bearer $env:SYSTEM_ACCESSTOKEN" push origin HEAD:$(Build.SourceBranchName)
+Title
+
+Implement Flyway Database Governance Framework (Quality Review, Drift Detection, Snapshot)
+
+User Story
+As a DevSecOps and Database Engineering team,
+I want to integrate Flyway Quality Code Review, Drift Detection, and Snapshot generation into Azure DevOps pipelines,
+so that database changes are governed, audited, and traceable across environments.
+
+Business Value
+Prevents poor-quality and insecure SQL migrations
+Detects unauthorized manual database changes (schema drift)
+Provides historical schema snapshots for audit, rollback, and debugging
+Aligns database CI/CD with enterprise governance and compliance requirements
+Scope / Description
+This story will implement an automated Flyway governance framework including:
+Quality Code Review (QCR) for migration scripts
+Drift Detection Reports between database and Flyway migrations
+Schema Snapshot Generation and Storage per release version
+All features will be integrated into Azure DevOps pipelines running on self-hosted agents with Flyway Enterprise CLI.
+
+Acceptance Criteria
+Quality Code Review
+Flyway QCR runs on every PR and pipeline execution
+QCR reports generated in JSON and HTML format
+Pipeline fails when critical violations exceed threshold
+Reports published as pipeline artifacts
+Drift Detection
+Drift detection runs against DEV, TEST, and PROD environments
+Drift reports generated using Flyway diff and diffText
+Pipeline highlights schema drift without modifying database
+Reports stored and accessible for audit
+Snapshot Management
+Flyway snapshot generated after successful migration
+Snapshots stored in versioned structure (e.g., Versions/<version>/snapshot)
+Snapshots retained according to retention policy
+Snapshot comparison supported for debugging and audits
+
+
+
+-------------------------------------------------------------------------------------------
+Title
+
+Enable ServiceNow–Azure DevOps Integration for Production (Service Account API Access & Validation)
+
+User Story
+
+As a DevSecOps engineer,
+I want to enable production API access for the Azure DevOps service account in ServiceNow and validate the integration with the ServiceNow Production instance,
+so that change request validation and automation workflows can run securely in production pipelines.
+
+Business Value
+
+Enables automated Change Request (CR) validation in production pipelines
+
+Ensures compliance with ITSM and audit requirements
+
+Eliminates manual CR verification steps
+
+Supports controlled and auditable production deployments
+
+Scope / Description
+
+This story will cover:
+
+Raising a ServiceNow Change Request to allow API access for the Azure DevOps service account in ServiceNow Production
+
+Configuring ServiceNow roles, permissions, and API access for the service account
+
+Updating Azure DevOps pipelines to use production ServiceNow API endpoints
+
+Validating integration by performing test API calls and CR validation workflows
+
+Documenting production readiness and operational procedures
+
+Acceptance Criteria
+ServiceNow Access Enablement
+
+A Change Request is raised and approved to grant API access to the Azure DevOps service account in ServiceNow Production
+
+Service account is assigned required ServiceNow roles (e.g., itil, rest_api, custom integration roles)
+
+Network and firewall rules allow connectivity from Azure DevOps agent to ServiceNow Prod API
+
+Integration Configuration
+
+Azure DevOps pipeline updated to use ServiceNow Production API URL
+
+Credentials stored securely (ADO Library / Key Vault)
+
+Authentication method (Basic/OAuth) configured and tested
+
+Validation
+
+Test API call successfully retrieves Change Request data from ServiceNow Prod
+
+Pipeline script validates CR state, schedule window, and business service mapping in Prod
+
+Logs and evidence captured for audit purposes
