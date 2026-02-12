@@ -1,16 +1,15 @@
-his change introduces automated integration between Azure DevOps (ADO) deployment pipelines and ServiceNow Change Management using ServiceNow REST APIs and centralized PowerShell validation logic.
+Azure DevOps pipeline execution in Production environment
 
-The integration validates Change Requests in real-time before allowing deployments to Production, ensuring governance, compliance, and risk reduction.
+ServiceNow Production REST API connectivity
 
-Microsoft officially supports ServiceNow integration with Azure Pipelines to reduce deployment risk and enforce ITIL-aligned change management controls.
-https://learn.microsoft.com/en-us/azure/devops/pipelines/release/approvals/servicenow?view=azure-devops
+Authentication using Production credentials
 
+Change Request validation logic
 
-flyway diff `
-  -source=migration `
-  -target=database `
-  -targetUrl="jdbc:sqlserver://DEVSERVER;databaseName=DEVDB" `
-  -targetUser="dbuser" `
-  -targetPassword="dbpass" `
-  -buildEnvironment="DEV"
+Change window validation
 
+Change state validation
+
+Business Service validation
+
+Pipeline behavior on validation success and failure
