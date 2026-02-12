@@ -1,15 +1,1 @@
-Azure DevOps pipeline execution in Production environment
-
-ServiceNow Production REST API connectivity
-
-Authentication using Production credentials
-
-Change Request validation logic
-
-Change window validation
-
-Change state validation
-
-Business Service validation
-
-Pipeline behavior on validation success and failure
+flyway diff -comparisonSource=migration -comparisonTarget=database -buildEnvironment=DEV
