@@ -3,3 +3,4 @@ his change introduces automated integration between Azure DevOps (ADO) deploymen
 The integration validates Change Requests in real-time before allowing deployments to Production, ensuring governance, compliance, and risk reduction.
 
 Microsoft officially supports ServiceNow integration with Azure Pipelines to reduce deployment risk and enforce ITIL-aligned change management controls.
+https://learn.microsoft.com/en-us/azure/devops/pipelines/release/approvals/servicenow?view=azure-devops
