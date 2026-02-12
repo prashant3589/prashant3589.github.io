@@ -4,3 +4,13 @@ The integration validates Change Requests in real-time before allowing deploymen
 
 Microsoft officially supports ServiceNow integration with Azure Pipelines to reduce deployment risk and enforce ITIL-aligned change management controls.
 https://learn.microsoft.com/en-us/azure/devops/pipelines/release/approvals/servicenow?view=azure-devops
+
+
+flyway diff `
+  -source=migration `
+  -target=database `
+  -targetUrl="jdbc:sqlserver://DEVSERVER;databaseName=DEVDB" `
+  -targetUser="dbuser" `
+  -targetPassword="dbpass" `
+  -buildEnvironment="DEV"
+
