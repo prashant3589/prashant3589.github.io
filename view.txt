@@ -1,1 +1,3 @@
-flyway diff -comparisonSource=migration -comparisonTarget=database -buildEnvironment=DEV
+This change is classified as a Major Change because it introduces a new automated governance control in the Production deployment process by integrating Azure DevOps pipelines with ServiceNow Change Management.
+
+The integration modifies the release governance process and enforces automated policy validation before Production deployments, which impacts enterprise release workflows and compliance controls.
