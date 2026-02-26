@@ -1,3 +1,13 @@
-This change is classified as a Major Change because it introduces a new automated governance control in the Production deployment process by integrating Azure DevOps pipelines with ServiceNow Change Management.
+USE YourDatabaseName;
+GO
 
-The integration modifies the release governance process and enforces automated policy validation before Production deployments, which impacts enterprise release workflows and compliance controls.
+SELECT 
+    r.name AS RoleName,
+    m.name AS MemberName,
+    m.type_desc AS MemberType
+FROM sys.database_role_members rm
+JOIN sys.database_principals r 
+    ON rm.role_principal_id = r.principal_id
+JOIN sys.database_principals m 
+    ON rm.member_principal_id = m.principal_id
+WHERE r.name = 'db_owner';
