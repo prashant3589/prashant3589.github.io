@@ -1,13 +1,9 @@
-USE YourDatabaseName;
-GO
-
-SELECT 
-    r.name AS RoleName,
-    m.name AS MemberName,
-    m.type_desc AS MemberType
-FROM sys.database_role_members rm
-JOIN sys.database_principals r 
-    ON rm.role_principal_id = r.principal_id
-JOIN sys.database_principals m 
-    ON rm.member_principal_id = m.principal_id
-WHERE r.name = 'db_owner';
+and(
+  or(
+    eq(root['result'][0]['state'],'Scheduled'),
+    eq(root['result'][0]['state'],'Implement')
+  ),
+  eq(root['result'][0]['business_service']['display_value'],'PaymentsService'),
+  greaterOrEquals(utcNow(), root['result'][0]['start_date']),
+  lessOrEquals(utcNow(), root['result'][0]['end_date'])
+)
