@@ -1,9 +1,14 @@
-Write-Host "===== RECORDS ====="
+$manualRecord = $response.records | Where-Object { $_.name -like "*Manual*" }
 
-foreach ($record in $response.records) {
-    Write-Host "--------------------------------"
-    Write-Host "Record Name: $($record.name)"
-    Write-Host "Record Type: $($record.type)"
-    Write-Host "Record State: $($record.state)"
-    Write-Host "Record Comment: $($record.comment)"
-}
+$logId = $manualRecord.log.id
+
+Write-Host "Log ID: $logId"
+$org = "$(System.CollectionUri)"
+$project = "$(System.TeamProject)"
+$buildId = "$(Build.BuildId)"
+$logUrl = "$org$project/_apis/build/builds/$buildId/logs/$logId?api-version=7.0"
+$log = Invoke-RestMethod -Uri $logUrl -Headers @{
+    Authorization = "Bearer $(System.AccessToken)"}
+
+Write-Host "===== Manual Validation Log ====="
+Write-Host $log
