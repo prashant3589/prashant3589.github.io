@@ -1,26 +1,13 @@
-$manualRecord = $response.records | Where-Object { $_.name -like "*Manual*" }
-
-$logId = $manualRecord.log.id
-
-Write-Host "Log ID: $logId"
 $org = "$(System.CollectionUri)"
 $project = "$(System.TeamProject)"
-$buildId = "$(Build.BuildId)"
-$logUrl = "$org$project/_apis/build/builds/$buildId/logs/$logId?api-version=7.0"
-$log = Invoke-RestMethod -Uri $logUrl -Headers @{
-    Authorization = "Bearer $(System.AccessToken)"}
-
-Write-Host "===== Manual Validation Log ====="
-Write-Host $log
-
-
-SELECT 
-    dp.name AS UserName,
-    dp.type_desc AS UserType,
-    dr.name AS RoleName
-FROM sys.database_role_members drm
-JOIN sys.database_principals dr 
-    ON drm.role_principal_id = dr.principal_id
-JOIN sys.database_principals dp 
-    ON drm.member_principal_id = dp.principal_id
-ORDER BY dp.name;
+$runId = "$(Build.BuildId)"
+$url = "$org$project/_apis/pipelines/approvals?runId=$runId&api-version=7.1-preview"
+$headers = @{
+    Authorization = "Bearer $(System.AccessToken)"
+}
+$response = Invoke-RestMethod -Uri $url -Headers $headers
+Write-Host "Approval Response:"
+$response | ConvertTo-Json -Depth 50 | Write-Host
+$comment = $response.value[0].approvalSteps[0].comment
+Write-Host "Change ID entered by approver: $comment"
+Write-Host "##vso[task.setvariable variable=CHANGE_ID]$comment"
