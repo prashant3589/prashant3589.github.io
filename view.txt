@@ -1,98 +1,49 @@
-Story Description
+trigger:
+- main
 
-As part of the deployment governance process, we need to integrate Azure DevOps (ADO) pipelines with ServiceNow change management to ensure deployments occur only when a valid change request exists.
+stages:
 
-A validation script already exists in the centralized repository. This story focuses on enabling pipelines to consume that script through a centralized pipeline template and execute it with configurable parameters.
+- stage: Deploy
+  jobs:
 
-The integration will validate the ServiceNow change request before allowing deployments to PPE and PROD environments.
+  - job: WaitForApproval
+    pool: server
+    steps:
 
-The pipeline will:
+    - task: ManualValidation@0
+      inputs:
+        notifyUsers: 'release.manager@company.com'
+        instructions: 'Enter ServiceNow Change ID in comments and approve'
+        onTimeout: reject
 
-Call a pipeline template from the centralized repository.
 
-Download and execute the existing ServiceNow validation script from the centralized repo.
+  - job: ReadChangeId
+    dependsOn: WaitForApproval
+    pool:
+      vmImage: ubuntu-latest
 
-Pass required parameters through variable files and variable groups.
+    steps:
 
-Validate change attributes such as environment, business service, and allowed state.
+    - powershell: |
+        $org = "$(System.CollectionUri)"
+        $project = "$(System.TeamProject)"
+        $buildId = "$(Build.BuildId)"
 
-This implementation ensures standardized governance across all deployment pipelines.
+        $url = "$org$project/_apis/build/builds/$buildId/timeline?api-version=7.0"
 
-Scope
+        $headers = @{
+            Authorization = "Bearer $(System.AccessToken)"
+        }
 
-Use centralized pipeline template for execution.
+        $response = Invoke-RestMethod -Uri $url -Headers $headers
 
-Pull ServiceNow validation script from centralized repository.
+        $comment = $response.records |
+          Where-Object { $_.type -eq "ManualValidation" } |
+          Select-Object -ExpandProperty comment
 
-Configure required parameters through variable files and variable groups.
+        Write-Host "Change ID entered: $comment"
 
-Validate ServiceNow change request before deployment approval.
+        Write-Host "##vso[task.setvariable variable=CHANGE_ID]$comment"
 
-Parameters to Configure
-
-The following parameters will be configurable via pipeline variable file or variable group:
-
-Parameter	Description
-serviceNowUrl	ServiceNow instance URL
-validateEnvironment	Target deployment environment (PPE / PROD)
-businessService	ServiceNow Business Service associated with the change
-allowedStatePPE	Allowed change state for PPE deployment
-allowedStateProd	Allowed change state for PROD deployment
-changeNumber	ServiceNow change request number
-Workflow / Implementation Approach
-
-Create a pipeline template reference to the centralized repository.
-
-Template will:
-
-Download the ServiceNow validation script.
-
-Execute the script during deployment stage.
-
-Pipeline will pass parameters from:
-
-Variable file
-
-Variable group
-
-Script will validate:
-
-Change request exists
-
-Change is linked to correct Business Service
-
-Change state is allowed for deployment environment
-
-Deployment proceeds only if validation succeeds.
-
-Configuration Updates
-
-Add ServiceNow configuration variables in ADO Variable Group.
-
-Update pipeline YAML to reference:
-
-Centralized repo template
-
-Variable group
-
-Variable file
-
-Acceptance Criteria
-
-Pipeline successfully references centralized template repository.
-
-ServiceNow validation script is downloaded from centralized repo during pipeline execution.
-
-Script executes using parameters from variable file and variable group.
-
-Change request is validated for:
-
-Environment (PPE / PROD)
-
-Business Service
-
-Allowed State
-
-Deployment fails if validation conditions are not met.
-
-Deployment proceeds when validation succeeds.
+      env:
+        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
