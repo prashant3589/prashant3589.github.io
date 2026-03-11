@@ -12,3 +12,15 @@ $log = Invoke-RestMethod -Uri $logUrl -Headers @{
 
 Write-Host "===== Manual Validation Log ====="
 Write-Host $log
+
+
+SELECT 
+    dp.name AS UserName,
+    dp.type_desc AS UserType,
+    dr.name AS RoleName
+FROM sys.database_role_members drm
+JOIN sys.database_principals dr 
+    ON drm.role_principal_id = dr.principal_id
+JOIN sys.database_principals dp 
+    ON drm.member_principal_id = dp.principal_id
+ORDER BY dp.name;
