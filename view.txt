@@ -1,49 +1,9 @@
-trigger:
-- main
+Write-Host "===== RECORDS ====="
 
-stages:
-
-- stage: Deploy
-  jobs:
-
-  - job: WaitForApproval
-    pool: server
-    steps:
-
-    - task: ManualValidation@0
-      inputs:
-        notifyUsers: 'release.manager@company.com'
-        instructions: 'Enter ServiceNow Change ID in comments and approve'
-        onTimeout: reject
-
-
-  - job: ReadChangeId
-    dependsOn: WaitForApproval
-    pool:
-      vmImage: ubuntu-latest
-
-    steps:
-
-    - powershell: |
-        $org = "$(System.CollectionUri)"
-        $project = "$(System.TeamProject)"
-        $buildId = "$(Build.BuildId)"
-
-        $url = "$org$project/_apis/build/builds/$buildId/timeline?api-version=7.0"
-
-        $headers = @{
-            Authorization = "Bearer $(System.AccessToken)"
-        }
-
-        $response = Invoke-RestMethod -Uri $url -Headers $headers
-
-        $comment = $response.records |
-          Where-Object { $_.type -eq "ManualValidation" } |
-          Select-Object -ExpandProperty comment
-
-        Write-Host "Change ID entered: $comment"
-
-        Write-Host "##vso[task.setvariable variable=CHANGE_ID]$comment"
-
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+foreach ($record in $response.records) {
+    Write-Host "--------------------------------"
+    Write-Host "Record Name: $($record.name)"
+    Write-Host "Record Type: $($record.type)"
+    Write-Host "Record State: $($record.state)"
+    Write-Host "Record Comment: $($record.comment)"
+}
