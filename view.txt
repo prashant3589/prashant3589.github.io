@@ -1,9 +1,98 @@
-and(
-  or(
-    eq(root['result'][0]['state'],'Scheduled'),
-    eq(root['result'][0]['state'],'Implement')
-  ),
-  eq(root['result'][0]['business_service']['display_value'],'PaymentsService'),
-  greaterOrEquals(utcNow(), root['result'][0]['start_date']),
-  lessOrEquals(utcNow(), root['result'][0]['end_date'])
-)
+Story Description
+
+As part of the deployment governance process, we need to integrate Azure DevOps (ADO) pipelines with ServiceNow change management to ensure deployments occur only when a valid change request exists.
+
+A validation script already exists in the centralized repository. This story focuses on enabling pipelines to consume that script through a centralized pipeline template and execute it with configurable parameters.
+
+The integration will validate the ServiceNow change request before allowing deployments to PPE and PROD environments.
+
+The pipeline will:
+
+Call a pipeline template from the centralized repository.
+
+Download and execute the existing ServiceNow validation script from the centralized repo.
+
+Pass required parameters through variable files and variable groups.
+
+Validate change attributes such as environment, business service, and allowed state.
+
+This implementation ensures standardized governance across all deployment pipelines.
+
+Scope
+
+Use centralized pipeline template for execution.
+
+Pull ServiceNow validation script from centralized repository.
+
+Configure required parameters through variable files and variable groups.
+
+Validate ServiceNow change request before deployment approval.
+
+Parameters to Configure
+
+The following parameters will be configurable via pipeline variable file or variable group:
+
+Parameter	Description
+serviceNowUrl	ServiceNow instance URL
+validateEnvironment	Target deployment environment (PPE / PROD)
+businessService	ServiceNow Business Service associated with the change
+allowedStatePPE	Allowed change state for PPE deployment
+allowedStateProd	Allowed change state for PROD deployment
+changeNumber	ServiceNow change request number
+Workflow / Implementation Approach
+
+Create a pipeline template reference to the centralized repository.
+
+Template will:
+
+Download the ServiceNow validation script.
+
+Execute the script during deployment stage.
+
+Pipeline will pass parameters from:
+
+Variable file
+
+Variable group
+
+Script will validate:
+
+Change request exists
+
+Change is linked to correct Business Service
+
+Change state is allowed for deployment environment
+
+Deployment proceeds only if validation succeeds.
+
+Configuration Updates
+
+Add ServiceNow configuration variables in ADO Variable Group.
+
+Update pipeline YAML to reference:
+
+Centralized repo template
+
+Variable group
+
+Variable file
+
+Acceptance Criteria
+
+Pipeline successfully references centralized template repository.
+
+ServiceNow validation script is downloaded from centralized repo during pipeline execution.
+
+Script executes using parameters from variable file and variable group.
+
+Change request is validated for:
+
+Environment (PPE / PROD)
+
+Business Service
+
+Allowed State
+
+Deployment fails if validation conditions are not met.
+
+Deployment proceeds when validation succeeds.
