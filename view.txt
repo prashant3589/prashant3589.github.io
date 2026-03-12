@@ -13,3 +13,5 @@ Write-Host "Change ID entered by approver: $comment"
 Write-Host "##vso[task.setvariable variable=CHANGE_ID]$comment"
 
 GET https://dev.azure.com/{organization}/{project}/_apis/pipelines/approvals?approvalIds={approvalIds}&$expand={$expand}&userIds={userIds}&state={state}&top={top}&api-version=7.1
+
+npm install <package-name> --registry=https://<jfrog-domain>/artifactory/api/npm/<repo-name>/
