@@ -24,3 +24,8 @@ $approval = $response.value | Where-Object {
 $changeId = $approval.approvalSteps[0].comment
 
 Write-Host "Change ID entered by approver: $changeId"
+
+if ([string]::IsNullOrWhiteSpace($changeId)) {
+    Write-Error "ServiceNow Change ID must be entered in approval comment."
+    exit 1
+}
