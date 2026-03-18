@@ -29,3 +29,159 @@ if ([string]::IsNullOrWhiteSpace($changeId)) {
     Write-Error "ServiceNow Change ID must be entered in approval comment."
     exit 1
 }
+
+
+
+
+# validate_servicenow_change.ps1
+
+## 📌 Overview
+
+`validate_servicenow_change.ps1` is a PowerShell script designed to validate **ServiceNow Change Requests** before allowing deployment in a CI/CD pipeline (e.g., Azure DevOps).
+
+The script ensures that:
+- The change request is within the valid time window
+- The change is in an allowed state
+- The change belongs to the correct business service
+- Restricted states (like Closed or Cancelled) are blocked
+- Change ID is dynamically fetched from pipeline approval comments
+
+---
+
+## 🚀 Use Case
+
+This script is typically used in deployment pipelines to enforce governance and compliance by validating ServiceNow Change Requests before production or pre-production deployments.
+
+---
+
+## 🧾 Parameters
+
+| Parameter | Type | Description |
+|----------|------|-------------|
+| `SERVICENOW_URL` | string | Base URL of ServiceNow instance |
+| `ENVIRONMENT` | string | Deployment environment (e.g., PPE, PROD) |
+| `BUSINESS_SERVICE` | string | Expected business service name |
+| `ALLOWEDSTATESPPE` | string[] | Allowed states for PPE environment |
+| `ORGANIZATION` | string | Azure DevOps organization name |
+| `PROJECT` | string | Azure DevOps project name |
+| `BUILD_ID` | string | Pipeline Build ID |
+| `TOKEN` | string | Azure DevOps System Access Token |
+
+---
+
+## ⚙️ Functions
+
+### 1. `BuildUrl`
+Builds the ServiceNow REST API URL.
+
+**Parameters:**
+- `baseUrl`
+- `changeId`
+
+**Purpose:**
+Constructs API endpoint to fetch change request details.
+
+---
+
+### 2. `BuildHeaders`
+Creates authorization headers for API calls.
+
+**Parameters:**
+- `user`
+- `password`
+
+**Purpose:**
+Generates authentication headers for ServiceNow API.
+
+---
+
+### 3. `Convert-ToDate`
+Converts raw date string into DateTime format.
+
+**Parameters:**
+- `RawDate`
+
+**Purpose:**
+Ensures date values from API response are usable for validation.
+
+---
+
+### 4. `Invoke-RestApiSafe`
+Executes REST API safely with error handling.
+
+**Parameters:**
+- `Uri`
+- `Method`
+- `Header`
+- `Body`
+- `TimeoutSec`
+
+**Purpose:**
+Handles API execution and prevents pipeline crashes due to API failures.
+
+---
+
+### 5. `ValidateChange`
+Validates the ServiceNow change request.
+
+**Parameters:**
+- `change`
+- `allowedStates`
+- `businessService`
+
+**Validations Performed:**
+- Change is within start and end date
+- Change state is allowed (Scheduled / Implemented)
+- Change belongs to correct business service
+
+---
+
+### 6. `ValidateRestrictedSate`
+Checks for restricted states.
+
+**Parameters:**
+- `restrictedState`
+- `allowedStatesPPE`
+
+**Purpose:**
+Fails execution if change state is:
+- Closed
+- Cancelled
+
+---
+
+### 7. `GetChangeID`
+Fetches Change ID from pipeline approval comments.
+
+**Parameters:**
+- `org`
+- `project`
+- `buildId`
+- `token`
+
+**Purpose:**
+- Calls Azure DevOps Approval API
+- Filters approval using `buildId`
+- Extracts Change ID from approval comment
+
+---
+
+## 🔄 Execution Flow
+
+```text
+Pipeline Triggered
+        ↓
+Fetch Change ID from Approval
+        ↓
+Build ServiceNow API URL
+        ↓
+Call ServiceNow API
+        ↓
+Validate:
+   - Duration
+   - State
+   - Business Service
+        ↓
+Check Restricted States
+        ↓
+Allow / Fail Deployment
