@@ -33,155 +33,49 @@ if ([string]::IsNullOrWhiteSpace($changeId)) {
 
 
 
-# validate_servicenow_change.ps1
+slide 1: Problem & Objective
+Key Points
+Manual validation of ServiceNow Change Requests before deployment
+Risk of deploying without approved or valid change
+No enforcement of change window or state
+Dependency on human checks → error-prone
+Objective
+Integrate Azure DevOps with ServiceNow
+Ensure only valid, approved changes are deployed
+Automate compliance and governance
+Summary
 
-## 📌 Overview
+Current deployment process lacks automated control, leading to risks and inefficiencies. This solution introduces automated validation to ensure all deployments are compliant with change management policies.
 
-`validate_servicenow_change.ps1` is a PowerShell script designed to validate **ServiceNow Change Requests** before allowing deployment in a CI/CD pipeline (e.g., Azure DevOps).
+🚀 Slide 2: Solution & Flow
+Key Points
+Pipeline auto-triggered on code commit
+Deployment pauses for approval
+Approver enters Change ID
+Pipeline validates via ServiceNow API:
+Change window (start/end time)
+Change state (Scheduled / Implement)
+Business service mapping
+Deployment proceeds only if validation passes
+Flow
+Code Commit → Pipeline Trigger → Approval → Enter Change ID
+→ ServiceNow Validation → Deploy / Fail
+Summary
 
-The script ensures that:
-- The change request is within the valid time window
-- The change is in an allowed state
-- The change belongs to the correct business service
-- Restricted states (like Closed or Cancelled) are blocked
-- Change ID is dynamically fetched from pipeline approval comments
+The solution automates validation by integrating pipeline approvals with ServiceNow, ensuring deployments happen only when the change is valid and authorized.
 
----
+📈 Slide 3: Benefits & Business Value
+Key Benefits
+✅ Enforces governance and ITIL compliance
+✅ Prevents unauthorized or risky deployments
+✅ Eliminates manual validation effort
+✅ Reduces human errors and deployment failures
+✅ Ensures deployments within approved change window
+Business Value
+Faster and reliable deployments
+Improved audit readiness
+Reduced production incidents
+Better control and visibility
+Summary
 
-## 🚀 Use Case
-
-This script is typically used in deployment pipelines to enforce governance and compliance by validating ServiceNow Change Requests before production or pre-production deployments.
-
----
-
-## 🧾 Parameters
-
-| Parameter | Type | Description |
-|----------|------|-------------|
-| `SERVICENOW_URL` | string | Base URL of ServiceNow instance |
-| `ENVIRONMENT` | string | Deployment environment (e.g., PPE, PROD) |
-| `BUSINESS_SERVICE` | string | Expected business service name |
-| `ALLOWEDSTATESPPE` | string[] | Allowed states for PPE environment |
-| `ORGANIZATION` | string | Azure DevOps organization name |
-| `PROJECT` | string | Azure DevOps project name |
-| `BUILD_ID` | string | Pipeline Build ID |
-| `TOKEN` | string | Azure DevOps System Access Token |
-
----
-
-## ⚙️ Functions
-
-### 1. `BuildUrl`
-Builds the ServiceNow REST API URL.
-
-**Parameters:**
-- `baseUrl`
-- `changeId`
-
-**Purpose:**
-Constructs API endpoint to fetch change request details.
-
----
-
-### 2. `BuildHeaders`
-Creates authorization headers for API calls.
-
-**Parameters:**
-- `user`
-- `password`
-
-**Purpose:**
-Generates authentication headers for ServiceNow API.
-
----
-
-### 3. `Convert-ToDate`
-Converts raw date string into DateTime format.
-
-**Parameters:**
-- `RawDate`
-
-**Purpose:**
-Ensures date values from API response are usable for validation.
-
----
-
-### 4. `Invoke-RestApiSafe`
-Executes REST API safely with error handling.
-
-**Parameters:**
-- `Uri`
-- `Method`
-- `Header`
-- `Body`
-- `TimeoutSec`
-
-**Purpose:**
-Handles API execution and prevents pipeline crashes due to API failures.
-
----
-
-### 5. `ValidateChange`
-Validates the ServiceNow change request.
-
-**Parameters:**
-- `change`
-- `allowedStates`
-- `businessService`
-
-**Validations Performed:**
-- Change is within start and end date
-- Change state is allowed (Scheduled / Implemented)
-- Change belongs to correct business service
-
----
-
-### 6. `ValidateRestrictedSate`
-Checks for restricted states.
-
-**Parameters:**
-- `restrictedState`
-- `allowedStatesPPE`
-
-**Purpose:**
-Fails execution if change state is:
-- Closed
-- Cancelled
-
----
-
-### 7. `GetChangeID`
-Fetches Change ID from pipeline approval comments.
-
-**Parameters:**
-- `org`
-- `project`
-- `buildId`
-- `token`
-
-**Purpose:**
-- Calls Azure DevOps Approval API
-- Filters approval using `buildId`
-- Extracts Change ID from approval comment
-
----
-
-## 🔄 Execution Flow
-
-```text
-Pipeline Triggered
-        ↓
-Fetch Change ID from Approval
-        ↓
-Build ServiceNow API URL
-        ↓
-Call ServiceNow API
-        ↓
-Validate:
-   - Duration
-   - State
-   - Business Service
-        ↓
-Check Restricted States
-        ↓
-Allow / Fail Deployment
+This integration delivers strong governance, reduces operational risk, and improves deployment efficiency—ensuring every release is compliant, controlled, and auditable.
