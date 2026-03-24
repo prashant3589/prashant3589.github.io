@@ -1,81 +1,55 @@
-$org = "$(System.CollectionUri)"
-$project = "$(System.TeamProject)"
-$runId = "$(Build.BuildId)"
-$url = "$org$project/_apis/pipelines/approvals?runId=$runId&api-version=7.1-preview"
-$headers = @{
-    Authorization = "Bearer $(System.AccessToken)"
-}
-$response = Invoke-RestMethod -Uri $url -Headers $headers
-Write-Host "Approval Response:"
-$response | ConvertTo-Json -Depth 50 | Write-Host
-$comment = $response.value[0].approvalSteps[0].comment
-Write-Host "Change ID entered by approver: $comment"
-Write-Host "##vso[task.setvariable variable=CHANGE_ID]$comment"
+Title
 
-GET https://dev.azure.com/{organization}/{project}/_apis/pipelines/approvals?`$expand=steps&api-version=7.1-preview.1
+Implement Flyway-based Database Migration Approach using Visual Studio Integration
 
-npm install <package-name> --registry=https://<jfrog-domain>/artifactory/api/npm/<repo-name>/
+📄 Description
 
-# Filter approval belonging to current pipeline run
-$approval = $response.value | Where-Object {
-    $_.pipeline.owner.id -eq $buildId
-}
-
-$changeId = $approval.approvalSteps[0].comment
-
-Write-Host "Change ID entered by approver: $changeId"
-
-if ([string]::IsNullOrWhiteSpace($changeId)) {
-    Write-Error "ServiceNow Change ID must be entered in approval comment."
-    exit 1
-}
+As a developer,
+I want to generate Flyway migration scripts directly from Visual Studio using external tools,
+So that I can capture database changes from DEV environment and maintain version-controlled, incremental migrations without changing existing EF/DACPAC workflow.
 
 
+🛠️ Scope
+Configure Flyway CLI on developer machines / build agents
+Integrate Flyway commands into Visual Studio (External Tools)
+Enable developers to:
+Run flyway diff
+Run flyway generate
+Run flyway validate
+Standardize migration folder structure
+Ensure compatibility with existing EF/DACPAC workflow
+🧩 Implementation Details
+🔹 Visual Studio Integration
+Configure External Tools:
+Flyway Info
+Flyway Diff
+Flyway Generate
+Flyway Validate
+🔹 Flyway Configuration
+Use flyway.toml for:
+Database connection
+Migration folder path
+Environment configuration
+🔹 Migration Strategy
+Use incremental versioned scripts
 
+Follow naming convention:
 
-slide 1: Problem & Objective
-Key Points
-Manual validation of ServiceNow Change Requests before deployment
-Risk of deploying without approved or valid change
-No enforcement of change window or state
-Dependency on human checks → error-prone
-Objective
-Integrate Azure DevOps with ServiceNow
-Ensure only valid, approved changes are deployed
-Automate compliance and governance
-Summary
-
-Current deployment process lacks automated control, leading to risks and inefficiencies. This solution introduces automated validation to ensure all deployments are compliant with change management policies.
-
-🚀 Slide 2: Solution & Flow
-Key Points
-Pipeline auto-triggered on code commit
-Deployment pauses for approval
-Approver enters Change ID
-Pipeline validates via ServiceNow API:
-Change window (start/end time)
-Change state (Scheduled / Implement)
-Business service mapping
-Deployment proceeds only if validation passes
-Flow
-Code Commit → Pipeline Trigger → Approval → Enter Change ID
-→ ServiceNow Validation → Deploy / Fail
-Summary
-
-The solution automates validation by integrating pipeline approvals with ServiceNow, ensuring deployments happen only when the change is valid and authorized.
-
-📈 Slide 3: Benefits & Business Value
-Key Benefits
-✅ Enforces governance and ITIL compliance
-✅ Prevents unauthorized or risky deployments
-✅ Eliminates manual validation effort
-✅ Reduces human errors and deployment failures
-✅ Ensures deployments within approved change window
-Business Value
-Faster and reliable deployments
-Improved audit readiness
-Reduced production incidents
-Better control and visibility
-Summary
-
-This integration delivers strong governance, reduces operational risk, and improves deployment efficiency—ensuring every release is compliant, controlled, and auditable.
+VYYYYMMDD_HHMM__description.sql
+🔹 Developer Workflow
+Pull latest develop
+Apply DB changes in DEV
+Run Flyway diff (DEV → migrations)
+Generate new migration script
+Commit only new migration
+Raise PR
+✅ Acceptance Criteria
+✔ Functional
+ Flyway CLI is installed and accessible via environment variables
+ Flyway commands can be executed from Visual Studio External Tools
+ Developer can generate migration using:
+flyway diff
+flyway generate
+ Migration script is created in configured migrations folder
+ Migration naming follows timestamp-based convention
+ flyway validate runs successfully
