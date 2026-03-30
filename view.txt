@@ -1,55 +1,74 @@
-Title
+param(
+[string]$EfProjectPath = "C:\EFProject",
+[string]$FlywayPath = "C:\Flyway\sql",
+[string]$StartVersion = 1
+)
 
-Implement Flyway-based Database Migration Approach using Visual Studio Integration
+Write-Host "Starting EF → Flyway conversion..."
 
-📄 Description
+# Step 1: Get all EF migrations (excluding snapshot)
 
-As a developer,
-I want to generate Flyway migration scripts directly from Visual Studio using external tools,
-So that I can capture database changes from DEV environment and maintain version-controlled, incremental migrations without changing existing EF/DACPAC workflow.
+$migrations = Get-ChildItem "$EfProjectPath\Migrations" -Filter "*.cs" |
+Where-Object { $_.Name -notlike "*ModelSnapshot*" } |
+Sort-Object Name
 
+if (-not $migrations) {
+Write-Host "No migrations found."
+exit
+}
 
-🛠️ Scope
-Configure Flyway CLI on developer machines / build agents
-Integrate Flyway commands into Visual Studio (External Tools)
-Enable developers to:
-Run flyway diff
-Run flyway generate
-Run flyway validate
-Standardize migration folder structure
-Ensure compatibility with existing EF/DACPAC workflow
-🧩 Implementation Details
-🔹 Visual Studio Integration
-Configure External Tools:
-Flyway Info
-Flyway Diff
-Flyway Generate
-Flyway Validate
-🔹 Flyway Configuration
-Use flyway.toml for:
-Database connection
-Migration folder path
-Environment configuration
-🔹 Migration Strategy
-Use incremental versioned scripts
+# Step 2: Loop through migrations
 
-Follow naming convention:
+$version = $StartVersion
 
-VYYYYMMDD_HHMM__description.sql
-🔹 Developer Workflow
-Pull latest develop
-Apply DB changes in DEV
-Run Flyway diff (DEV → migrations)
-Generate new migration script
-Commit only new migration
-Raise PR
-✅ Acceptance Criteria
-✔ Functional
- Flyway CLI is installed and accessible via environment variables
- Flyway commands can be executed from Visual Studio External Tools
- Developer can generate migration using:
-flyway diff
-flyway generate
- Migration script is created in configured migrations folder
- Migration naming follows timestamp-based convention
- flyway validate runs successfully
+foreach ($migration in $migrations) {
+
+```
+# Extract migration name (remove timestamp)
+$nameParts = $migration.BaseName -split "_", 2
+if ($nameParts.Count -lt 2) {
+    Write-Host "Skipping invalid migration: $($migration.Name)"
+    continue
+}
+
+$migrationName = $nameParts[1]
+
+# Format Flyway filename
+$versionStr = ("{0:D3}" -f $version)
+$flywayFile = "V${versionStr}__${migrationName}.sql"
+$outputPath = Join-Path $FlywayPath $flywayFile
+
+Write-Host "Processing migration: $migrationName → $flywayFile"
+
+# Step 3: Generate SQL script for this migration
+$tempSql = Join-Path $env:TEMP "$migrationName.sql"
+
+Push-Location $EfProjectPath
+
+dotnet ef migrations script `
+    --idempotent `
+    -o $tempSql | Out-Null
+
+Pop-Location
+
+# Step 4: Clean SQL (remove EF noise if needed)
+$sqlContent = Get-Content $tempSql -Raw
+
+# Optional cleanup (basic)
+$sqlContent = $sqlContent -replace "^\s*Build started.*$", ""
+$sqlContent = $sqlContent -replace "^\s*Build succeeded.*$", ""
+
+# Step 5: Save to Flyway folder
+Set-Content -Path $outputPath -Value $sqlContent
+
+Write-Host "Created: $outputPath"
+
+# Cleanup temp file
+Remove-Item $tempSql -ErrorAction SilentlyContinue
+
+$version++
+```
+
+}
+
+Write-Host "Conversion completed successfully!"
