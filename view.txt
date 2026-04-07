@@ -1,74 +1,69 @@
-param(
-[string]$EfProjectPath = "C:\EFProject",
-[string]$FlywayPath = "C:\Flyway\sql",
-[string]$StartVersion = 1
-)
+Story
 
-Write-Host "Starting EF → Flyway conversion..."
+As a DevOps/Backend Engineer,
+I want to standardize the process of converting Entity Framework (EF) migrations into Flyway-compatible scripts and executing them,
+so that database changes are consistent, version-controlled, and reliably deployed across environments.
 
-# Step 1: Get all EF migrations (excluding snapshot)
+Background / Context
 
-$migrations = Get-ChildItem "$EfProjectPath\Migrations" -Filter "*.cs" |
-Where-Object { $_.Name -notlike "*ModelSnapshot*" } |
-Sort-Object Name
+Currently, EF migrations are used for schema changes, but there is no standardized approach to:
 
-if (-not $migrations) {
-Write-Host "No migrations found."
-exit
-}
+Convert EF migrations into SQL scripts compatible with Flyway
+Maintain versioning and naming conventions
+Execute migrations consistently across environments
 
-# Step 2: Loop through migrations
+This leads to:
 
-$version = $StartVersion
+Inconsistent deployments
+Manual errors
+Lack of auditability
+Scope
+Define approach for:
+Generating SQL scripts from EF migrations
+Transforming scripts into Flyway format
+Versioning and naming conventions
+Execution of Flyway migrations via pipeline
+Cover environments: Dev, QA, Prod
+Acceptance Criteria
+✅ 1. EF to SQL Script Generation
 
-foreach ($migration in $migrations) {
+A standard command/process is defined:
 
-```
-# Extract migration name (remove timestamp)
-$nameParts = $migration.BaseName -split "_", 2
-if ($nameParts.Count -lt 2) {
-    Write-Host "Skipping invalid migration: $($migration.Name)"
-    continue
-}
+dotnet ef migrations script <from> <to> -o <output.sql>
+Supports:
+Incremental migration
+Full baseline script
+✅ 2. Flyway Script Formatting
 
-$migrationName = $nameParts[1]
+Scripts follow Flyway naming convention:
 
-# Format Flyway filename
-$versionStr = ("{0:D3}" -f $version)
-$flywayFile = "V${versionStr}__${migrationName}.sql"
-$outputPath = Join-Path $FlywayPath $flywayFile
+V<version>__<description>.sql
 
-Write-Host "Processing migration: $migrationName → $flywayFile"
+Example:
 
-# Step 3: Generate SQL script for this migration
-$tempSql = Join-Path $env:TEMP "$migrationName.sql"
+V1_0_0__create_employee_table.sql
+Script must:
+Be idempotent (if required)
+Avoid EF-specific metadata where unnecessary
+Be reviewed before commit
+✅ 3. Baseline Strategy
 
-Push-Location $EfProjectPath
+Initial baseline defined using:
 
-dotnet ef migrations script `
-    --idempotent `
-    -o $tempSql | Out-Null
+flyway baseline
+Baseline version documented (e.g., V1.0.0)
+Existing DB state aligned with baseline
+✅ 4. Script Storage
 
-Pop-Location
+All scripts stored in:
 
-# Step 4: Clean SQL (remove EF noise if needed)
-$sqlContent = Get-Content $tempSql -Raw
+/database/flyway/migrations
+Version-controlled via Git
+✅ 5. Flyway Execution
+Flyway execution integrated in pipeline:
+Validate
+Migrate
 
-# Optional cleanup (basic)
-$sqlContent = $sqlContent -replace "^\s*Build started.*$", ""
-$sqlContent = $sqlContent -replace "^\s*Build succeeded.*$", ""
+Command example:
 
-# Step 5: Save to Flyway folder
-Set-Content -Path $outputPath -Value $sqlContent
-
-Write-Host "Created: $outputPath"
-
-# Cleanup temp file
-Remove-Item $tempSql -ErrorAction SilentlyContinue
-
-$version++
-```
-
-}
-
-Write-Host "Conversion completed successfully!"
+flyway migrate
