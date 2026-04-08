@@ -1,69 +1,84 @@
-Story
+# ---------------- CONFIG ----------------
+$jiraBaseUrl = "https://your-domain.atlassian.net"
+$jiraEmail = "your-email@domain.com"
+$jiraApiToken = "your-jira-api-token"
 
-As a DevOps/Backend Engineer,
-I want to standardize the process of converting Entity Framework (EF) migrations into Flyway-compatible scripts and executing them,
-so that database changes are consistent, version-controlled, and reliably deployed across environments.
+$adoOrg = "https://dev.azure.com/your-org"
+$adoProject = "your-project"
+$adoRepo = "your-wiki-repo"   # or use artifact instead
+$adoPat = "your-ado-pat"
 
-Background / Context
+$sprintName = "Sprint 25"
+$projectKey = "ABC"
 
-Currently, EF migrations are used for schema changes, but there is no standardized approach to:
+# ---------------- AUTH ----------------
+$jiraAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$jiraEmail:$jiraApiToken"))
+$adoAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$adoPat"))
 
-Convert EF migrations into SQL scripts compatible with Flyway
-Maintain versioning and naming conventions
-Execute migrations consistently across environments
+# ---------------- JIRA FETCH ----------------
+$jql = "sprint = `"$sprintName`" AND project = `"$projectKey`" ORDER BY issuetype"
+$encodedJql = [System.Web.HttpUtility]::UrlEncode($jql)
 
-This leads to:
+$jiraUrl = "$jiraBaseUrl/rest/api/3/search?jql=$encodedJql&maxResults=100"
 
-Inconsistent deployments
-Manual errors
-Lack of auditability
-Scope
-Define approach for:
-Generating SQL scripts from EF migrations
-Transforming scripts into Flyway format
-Versioning and naming conventions
-Execution of Flyway migrations via pipeline
-Cover environments: Dev, QA, Prod
-Acceptance Criteria
-✅ 1. EF to SQL Script Generation
+$response = Invoke-RestMethod -Uri $jiraUrl -Headers @{
+    Authorization = "Basic $jiraAuth"
+    Accept = "application/json"
+}
 
-A standard command/process is defined:
+# ---------------- PROCESS DATA ----------------
+$stories = @()
+$bugs = @()
+$tasks = @()
 
-dotnet ef migrations script <from> <to> -o <output.sql>
-Supports:
-Incremental migration
-Full baseline script
-✅ 2. Flyway Script Formatting
+foreach ($issue in $response.issues) {
+    $type = $issue.fields.issuetype.name
+    $summary = $issue.fields.summary
+    $key = $issue.key
 
-Scripts follow Flyway naming convention:
+    $item = "- [$key] $summary"
 
-V<version>__<description>.sql
+    switch ($type) {
+        "Story" { $stories += $item }
+        "Bug"   { $bugs += $item }
+        default { $tasks += $item }
+    }
+}
 
-Example:
+# ---------------- BUILD RELEASE NOTES ----------------
+$releaseNotes = @"
+# Release Notes - $sprintName
 
-V1_0_0__create_employee_table.sql
-Script must:
-Be idempotent (if required)
-Avoid EF-specific metadata where unnecessary
-Be reviewed before commit
-✅ 3. Baseline Strategy
+## 🚀 Features
+$(($stories -join "`n"))
 
-Initial baseline defined using:
+## 🐞 Bug Fixes
+$(($bugs -join "`n"))
 
-flyway baseline
-Baseline version documented (e.g., V1.0.0)
-Existing DB state aligned with baseline
-✅ 4. Script Storage
+## 🔧 Improvements / Tasks
+$(($tasks -join "`n"))
 
-All scripts stored in:
+Generated on: $(Get-Date)
+"@
 
-/database/flyway/migrations
-Version-controlled via Git
-✅ 5. Flyway Execution
-Flyway execution integrated in pipeline:
-Validate
-Migrate
+# Save locally
+$filePath = "release-notes.md"
+$releaseNotes | Out-File -FilePath $filePath -Encoding utf8
 
-Command example:
+Write-Host "Release notes generated: $filePath"
 
-flyway migrate
+# ---------------- PUBLISH TO AZURE DEVOPS WIKI ----------------
+$wikiPagePath = "/ReleaseNotes/$sprintName.md"
+
+$wikiApiUrl = "$adoOrg/$adoProject/_apis/wiki/wikis/$adoRepo/pages?path=$wikiPagePath&api-version=7.0"
+
+$body = @{
+    content = $releaseNotes
+} | ConvertTo-Json -Depth 10
+
+Invoke-RestMethod -Uri $wikiApiUrl -Method Put -Headers @{
+    Authorization = "Basic $adoAuth"
+    "Content-Type" = "application/json"
+} -Body $body
+
+Write-Host "Published to Azure DevOps Wiki!"
