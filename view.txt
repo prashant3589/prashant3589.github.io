@@ -1,3 +1,6 @@
+https://id.atlassian.com/manage-profile/security/api-tokens
+
+
 # ---------------- CONFIG ----------------
 $jiraBaseUrl = "https://your-domain.atlassian.net"
 $jiraEmail = "your-email@domain.com"
