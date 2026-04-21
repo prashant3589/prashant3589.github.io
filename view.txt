@@ -1,87 +1,234 @@
-https://id.atlassian.com/manage-profile/security/api-tokens
+Slide 1 — Title
+Entity Framework + Flyway Database DevOps Demo
 
+Automating SQL Server schema changes using EF Migrations, Flyway, and Azure DevOps
 
-# ---------------- CONFIG ----------------
-$jiraBaseUrl = "https://your-domain.atlassian.net"
-$jiraEmail = "your-email@domain.com"
-$jiraApiToken = "your-jira-api-token"
+Objective:
+Enable governed, repeatable, auditable database deployments through CI/CD pipelines.
 
-$adoOrg = "https://dev.azure.com/your-org"
-$adoProject = "your-project"
-$adoRepo = "your-wiki-repo"   # or use artifact instead
-$adoPat = "your-ado-pat"
+Slide 2 — What is Flyway?
+Flyway Overview
 
-$sprintName = "Sprint 25"
-$projectKey = "ABC"
+Flyway is a database migration tool used to version, track, validate, and deploy schema changes across environments.
 
-# ---------------- AUTH ----------------
-$jiraAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$jiraEmail:$jiraApiToken"))
-$adoAuth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(":$adoPat"))
+Core Capabilities
+Versioned SQL migrations (V1__Init.sql, V2__AddTable.sql)
+Ordered deployment execution
+Change history tracking
+Validation & checksum verification
+Drift detection
+Repeatable migrations
+Rollback strategy support (process-based)
+CI/CD integration
+Why Use Flyway?
+Controlled production deployments
+Source-controlled database changes
+Auditability & compliance
+Prevents manual script execution risks
+Slide 3 — Why Flyway with Entity Framework?
+Challenge with EF-Only Approach
 
-# ---------------- JIRA FETCH ----------------
-$jql = "sprint = `"$sprintName`" AND project = `"$projectKey`" ORDER BY issuetype"
-$encodedJql = [System.Web.HttpUtility]::UrlEncode($jql)
+Entity Framework migrations are developer-friendly but often lack enterprise deployment governance.
 
-$jiraUrl = "$jiraBaseUrl/rest/api/3/search?jql=$encodedJql&maxResults=100"
+Combined Model
 
-$response = Invoke-RestMethod -Uri $jiraUrl -Headers @{
-    Authorization = "Basic $jiraAuth"
-    Accept = "application/json"
-}
+Use EF for:
 
-# ---------------- PROCESS DATA ----------------
-$stories = @()
-$bugs = @()
-$tasks = @()
+Developer productivity
+Model-first schema generation
 
-foreach ($issue in $response.issues) {
-    $type = $issue.fields.issuetype.name
-    $summary = $issue.fields.summary
-    $key = $issue.key
+Use Flyway for:
 
-    $item = "- [$key] $summary"
+SQL artifact versioning
+Controlled promotion to environments
+Pipeline-based execution
+Drift / validation reporting
+Best of Both Worlds
+Developer Change → EF Migration → SQL Script → Flyway Deployment
+Slide 4 — Flyway with Azure DevOps Pipeline
+CI/CD Integration with Microsoft Azure DevOps
 
-    switch ($type) {
-        "Story" { $stories += $item }
-        "Bug"   { $bugs += $item }
-        default { $tasks += $item }
-    }
-}
+Pipeline stages:
 
-# ---------------- BUILD RELEASE NOTES ----------------
-$releaseNotes = @"
-# Release Notes - $sprintName
+Build application
+Generate / validate migration scripts
+Flyway checks
+Deploy to DEV
+Promote to QA / UAT
+Production approval + deploy
+Benefits
+One-click repeatable deployments
+Environment approvals
+Reports & evidence
+Release governance
+Slide 5 — Prerequisites
+Infrastructure & Access
+Build Agent
+Self-hosted or Microsoft-hosted agent
+Network access to DB servers
+Java (if required by version)
+PowerShell / Bash support
+Flyway Setup
+Install Flyway CLI on agent
+Add Flyway to PATH
+Store license / permit file (if enterprise edition)
+Database Access
 
-## 🚀 Features
-$(($stories -join "`n"))
+Create dedicated Flyway DB user:
 
-## 🐞 Bug Fixes
-$(($bugs -join "`n"))
+Read metadata
+Create / alter schema objects
+Execute migrations
+Limited controlled permissions
+Secure Storage
 
-## 🔧 Improvements / Tasks
-$(($tasks -join "`n"))
+Use:
 
-Generated on: $(Get-Date)
-"@
+Azure DevOps Variable Groups
+Secret variables
+Key Vault integration
+Slide 6 — Recommended Repository Structure
+src/
+database/
+  ef-migrations/
+  flyway/
+    common/
+      V1__Baseline.sql
+      V2__AddCustomer.sql
+    repeatable/
+      R__Views.sql
+pipelines/
+Benefits
+Separation of app code and DB artifacts
+Clear ownership
+Pipeline friendly
+Slide 7 — Developer Workflow (EF to Flyway)
+Step-by-Step
+Create feature branch from develop
+Modify model/entities
+Generate EF migration
+dotnet ef migrations add AddCustomerTable
+Generate SQL script from EF migration
+dotnet ef migrations script
+Convert output into Flyway versioned script
+V20260421_01__AddCustomerTable.sql
+Commit:
+Application code
+EF migration
+Flyway script
+Raise PR
+Slide 8 — Suggested Versioning Strategy
+Recommended Naming
+V20260421_1530__AddCustomerTable.sql
+Why Timestamp Versions?
+Avoid collisions between developers
+Supports parallel development
+Easier sequencing
+Avoid
+V5.sql / V6.sql
 
-# Save locally
-$filePath = "release-notes.md"
-$releaseNotes | Out-File -FilePath $filePath -Encoding utf8
+in high-concurrency teams.
 
-Write-Host "Release notes generated: $filePath"
+Slide 9 — Pull Request Validation Pipeline
+Triggered on PR
 
-# ---------------- PUBLISH TO AZURE DEVOPS WIKI ----------------
-$wikiPagePath = "/ReleaseNotes/$sprintName.md"
+Checks:
 
-$wikiApiUrl = "$adoOrg/$adoProject/_apis/wiki/wikis/$adoRepo/pages?path=$wikiPagePath&api-version=7.0"
+Build .NET solution
+Validate EF migration exists
+Flyway validate
+Duplicate version check
+SQL lint / quality checks
+Generate drift preview
+Security scan (optional)
+Outcome
 
-$body = @{
-    content = $releaseNotes
-} | ConvertTo-Json -Depth 10
+Only healthy migrations merge to develop.
 
-Invoke-RestMethod -Uri $wikiApiUrl -Method Put -Headers @{
-    Authorization = "Basic $adoAuth"
-    "Content-Type" = "application/json"
-} -Body $body
+Slide 10 — Deployment Pipeline Flow
+DEV Stage
+Flyway info
+Flyway migrate
+Generate migration report
+QA/UAT Stage
+Approval gate
+Validate checksum
+Drift report
+Flyway migrate
+PROD Stage
+CAB / Approval
+Backup checkpoint
+Flyway migrate
+Publish evidence
+Slide 11 — Flyway Reports
+1. Info Report
 
-Write-Host "Published to Azure DevOps Wiki!"
+Shows:
+
+Pending migrations
+Applied migrations
+Failed migrations
+Current version
+2. Drift Report
+
+Detects:
+
+Manual DB changes
+Out-of-band schema modifications
+Non-source-controlled objects
+3. Migration Report
+
+Shows:
+
+What executed
+Duration
+Success/failure
+Target version
+4. Code Quality Report
+
+Checks:
+
+Naming conventions
+Unsafe SQL patterns
+Missing transactions
+Standards compliance
+Slide 12 — Sample Pipeline Commands
+flyway info
+flyway validate
+flyway check drift
+flyway migrate
+flyway check code
+
+(Use edition-supported commands per licensed version.)
+
+Slide 13 — Security & Governance
+Controls
+Dedicated Flyway service account
+Secrets in Key Vault
+Environment approvals
+Full execution logs
+Segregation of duties
+PR review before merge
+Slide 14 — Business Benefits
+Outcomes
+Faster releases
+Fewer DB deployment failures
+Full audit trail
+Reduced manual DBA effort
+Consistent environments
+Better developer productivity
+Slide 15 — Demo Flow
+Live Demonstration
+Create EF model change
+Generate migration
+Convert to Flyway script
+Raise PR
+Run ADO pipeline
+View reports
+Verify DB updated
+Slide 16 — Key Takeaway
+EF + Flyway + Azure DevOps = Mature Database DevOps
+
+Use EF for development speed.
+Use Flyway for deployment governance.
+Use Azure DevOps for automation and approvals.
