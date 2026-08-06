@@ -1,115 +1,184 @@
-PQR Application Modernization Success Story
+# ============================================
+# Windows WiFi Diagnostic & Repair Script
+# Author: ChatGPT
+# Version: 1.0
+# ============================================
 
-The PQR application modernization initiative was a key transformation effort focused on improving deployment reliability, eliminating manual operational dependencies, and introducing DevSecOps-aligned CI/CD practices for a legacy application landscape.
+Write-Host ""
+Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host " Windows WiFi Diagnostic & Repair Tool"
+Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host ""
 
-The application previously relied on highly manual deployment processes with limited automation and no standardized production deployment pipeline in place. This created operational risk, increased deployment time, and reduced release confidence.
+# Check Administrator
+$currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
+$principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
 
-Existing Challenges in Legacy Deployment Model
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
+{
+    Write-Host "Please run PowerShell as Administrator." -ForegroundColor Red
+    exit
+}
 
-Before transformation, the application deployment ecosystem had several critical limitations:
+Write-Host "Running with Administrator privileges." -ForegroundColor Green
 
-No automated production deployment pipeline existed
-Production deployments involved manual operational intervention
-Deployment teams manually copied artifacts into deployment folders
-High dependency on individual operational knowledge
-No integrated security scanning within the release process
-Legacy deployment process lacked governance and traceability
-Increased risk of deployment inconsistencies and human error
+# ---------------------------------------------
+# Network Adapters
+# ---------------------------------------------
+Write-Host ""
+Write-Host "Network Adapters"
+Write-Host "----------------"
 
-The manual artifact handling process significantly slowed release execution and increased operational overhead during production deployments.
+Get-NetAdapter | Format-Table Name, InterfaceDescription, Status, MacAddress
 
-Transformation Objectives
+# ---------------------------------------------
+# Find WiFi Adapter
+# ---------------------------------------------
 
-The modernization initiative focused on:
+$wifi = Get-NetAdapter |
+Where-Object {
+    $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11|Intel|Realtek|Qualcomm|MediaTek"
+}
 
-Eliminating manual deployment activities
-Introducing standardized CI/CD pipelines
-Improving deployment speed and reliability
-Integrating security scanning into deployment workflows
-Reducing operational dependency and human error
-Aligning the platform with modern DevSecOps practices
-Key Improvements Delivered
-1. Automated Production Deployment Pipeline
+if($wifi)
+{
+    Write-Host ""
+    Write-Host "WiFi Adapter Found:" -ForegroundColor Green
 
-One of the most significant achievements was the implementation of a fully automated production deployment pipeline for the legacy application.
+    $wifi | Format-Table Name, Status, InterfaceDescription
 
-This replaced:
+    foreach($adapter in $wifi)
+    {
+        if($adapter.Status -eq "Disabled")
+        {
+            Write-Host ""
+            Write-Host "Enabling Adapter..." -ForegroundColor Yellow
 
-manual production deployment activities
+            Enable-NetAdapter `
+                -Name $adapter.Name `
+                -Confirm:$false
+        }
+    }
+}
+else
+{
+    Write-Host ""
+    Write-Host "No WiFi adapter detected!" -ForegroundColor Red
+    Write-Host "Possible Causes:"
+    Write-Host " - Driver Missing"
+    Write-Host " - Hardware Disabled"
+    Write-Host " - BIOS Wireless Disabled"
+}
 
-with:
+# ---------------------------------------------
+# WLAN Service
+# ---------------------------------------------
 
-standardized automated CI/CD workflows
+Write-Host ""
+Write-Host "Checking WLAN AutoConfig"
 
-resulting in improved:
+$service = Get-Service WlanSvc -ErrorAction SilentlyContinue
 
-release governance
-deployment consistency
-operational scalability
-auditability
-2. Elimination of Manual Artifact Copy Activity
+if($service)
+{
+    if($service.Status -ne "Running")
+    {
+        Write-Host "Starting WLAN Service..." -ForegroundColor Yellow
 
-The legacy deployment process required teams to manually copy application artifacts into deployment directories before execution.
+        Set-Service WlanSvc -StartupType Automatic
 
-This manual operational dependency was completely eliminated through automation.
+        Start-Service WlanSvc
+    }
 
-As a result:
+    Write-Host "WLAN Service Running" -ForegroundColor Green
+}
+else
+{
+    Write-Host "WLAN Service Not Found!" -ForegroundColor Red
+}
 
-deployment execution time reduced by nearly 90%
+# ---------------------------------------------
+# Wireless Interface
+# ---------------------------------------------
 
-This improvement significantly accelerated:
+Write-Host ""
+Write-Host "Wireless Interface"
+Write-Host "------------------"
 
-production releases
-deployment readiness
-operational efficiency
+netsh wlan show interfaces
 
-while also reducing:
+Write-Host ""
+Write-Host "Wireless Driver"
+Write-Host "---------------"
 
-human intervention
-deployment risk
-operational dependency
-3. Security Scan Integration (DevSecOps Enablement)
+netsh wlan show drivers
 
-The legacy application had no integrated security validation process within the CI/CD lifecycle.
+# ---------------------------------------------
+# IP Configuration
+# ---------------------------------------------
 
-As part of modernization:
-✅ automated security scanning was introduced
-✅ security validation became part of deployment governance
-✅ vulnerability detection shifted earlier into delivery lifecycle
+Write-Host ""
+Write-Host "IP Configuration"
+Write-Host "----------------"
 
-This improved:
+ipconfig /all
 
-release compliance
-platform security posture
-DevSecOps maturity
-4. Improved Deployment Reliability
+# ---------------------------------------------
+# Network Repair
+# ---------------------------------------------
 
-By eliminating manual deployment dependencies and standardizing automation workflows, the transformed deployment model achieved:
+Write-Host ""
+Write-Host "Resetting Network Stack..."
 
-✅ higher deployment consistency
-✅ reduced operational risk
-✅ improved release predictability
-✅ faster troubleshooting capability
+netsh winsock reset
 
-Business & Operational Impact
-Area	Impact
-Production Deployment	Fully automated
-Manual Activities	Eliminated
-Deployment Time	Reduced by ~90%
-Security Governance	Enhanced
-Operational Dependency	Reduced
-Deployment Reliability	Improved
-Release Consistency	Standardized
-Strategic Outcome
+netsh int ip reset
 
-The PQR application modernization successfully transformed a legacy, manually operated deployment ecosystem into a modern automated delivery platform aligned with enterprise DevSecOps principles.
+ipconfig /flushdns
 
-The initiative delivered:
+# ---------------------------------------------
+# SFC
+# ---------------------------------------------
 
-faster production deployments
-reduced operational overhead
-stronger security governance
-improved deployment confidence
-scalable CI/CD foundation for future modernization efforts
-Executive Summary Version
-Successfully modernized the legacy PQR application deployment ecosystem by implementing automated production deployment pipelines and eliminating manual operational activities. The previous deployment process relied heavily on manual artifact replacement and lacked integrated security validation. Through the transformation initiative, manual artifact copy operations were fully automated, reducing deployment execution time by nearly 90%. Security scanning was integrated into the CI/CD workflow, significantly improving governance, deployment reliability, and overall DevSecOps maturity while establishing a scalable and standardized deployment model.
+Write-Host ""
+Write-Host "Running System File Checker"
+
+sfc /scannow
+
+# ---------------------------------------------
+# Restart Adapter
+# ---------------------------------------------
+
+if($wifi)
+{
+    foreach($adapter in $wifi)
+    {
+        Write-Host ""
+        Write-Host "Restarting Adapter $($adapter.Name)"
+
+        Disable-NetAdapter `
+            -Name $adapter.Name `
+            -Confirm:$false
+
+        Start-Sleep 3
+
+        Enable-NetAdapter `
+            -Name $adapter.Name `
+            -Confirm:$false
+    }
+}
+
+Write-Host ""
+Write-Host "==========================================" -ForegroundColor Cyan
+Write-Host "Diagnostics Completed"
+Write-Host "==========================================" -ForegroundColor Cyan
+
+Write-Host ""
+Write-Host "If WiFi is still missing:"
+Write-Host "1. Check Device Manager."
+Write-Host "2. Scan for Hardware Changes."
+Write-Host "3. Install OEM WiFi Driver."
+Write-Host "4. Check BIOS Wireless Enable."
+Write-Host "5. Reboot Computer."
+
+Write-Host ""
