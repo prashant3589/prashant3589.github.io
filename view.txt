@@ -1,184 +1,398 @@
-# ============================================
-# Windows WiFi Diagnostic & Repair Script
-# Author: ChatGPT
-# Version: 1.0
-# ============================================
-
-Write-Host ""
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host " Windows WiFi Diagnostic & Repair Tool"
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Check Administrator
-$currentUser = [Security.Principal.WindowsIdentity]::GetCurrent()
-$principal = New-Object Security.Principal.WindowsPrincipal($currentUser)
-
-if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator))
 {
-    Write-Host "Please run PowerShell as Administrator." -ForegroundColor Red
-    exit
+	"info": {
+		"_postman_id": "edbf9a73-1cb0-4dd9-9f89-63ce39311503",
+		"name": "SharePoint Rest API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Auth Token",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "grant_type",
+							"value": "client_credentials",
+							"type": "default"
+						},
+						{
+							"key": "client_id",
+							"value": "{{ClientID}}",
+							"type": "default"
+						},
+						{
+							"key": "client_secret",
+							"value": "{{ClientSecret}}",
+							"type": "default"
+						},
+						{
+							"key": "scope",
+							"value": "https://graph.microsoft.com/.default",
+							"type": "default"
+						}
+					]
+				},
+				"url": {
+					"raw": "https://login.microsoftonline.com/{{TenantID}}/oauth2/v2.0/token",
+					"protocol": "https",
+					"host": [
+						"login",
+						"microsoftonline",
+						"com"
+					],
+					"path": [
+						"{{TenantID}}",
+						"oauth2",
+						"v2.0",
+						"token"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Get Drive Items Copy",
+			"request": {
+				"auth": {
+					"type": "bearer"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/root:/TestFolder/testimage.png",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"root:",
+						"TestFolder",
+						"testimage.png"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Get Site ID",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": []
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/{{TenantName}}.sharepoint.com:/sites/{{SiteName}}",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"{{TenantName}}.sharepoint.com:",
+						"sites",
+						"{{SiteName}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Get Drive ID",
+			"request": {
+				"auth": {
+					"type": "bearer"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "default"
+					}
+				],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/sites/{{SiteID}}/drives",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"sites",
+						"{{SiteID}}",
+						"drives"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Upload Document",
+			"request": {
+				"auth": {
+					"type": "bearer"
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "default"
+					}
+				],
+				"body": {
+					"mode": "file",
+					"file": {
+						"src": "/home/bitcot/Downloads/profile3.jpg"
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/root:/Upload/testimage.png:/content",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"root:",
+						"Upload",
+						"testimage.png:",
+						"content"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Get Drive Folder Details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/root:/Upload",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"root:",
+						"Upload"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Get Drive Item By Id Copy 2",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/items/01RWSCBOREK5WQWMM3UBAZAJSS3OR57RKQ",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"items",
+						"01RWSCBOREK5WQWMM3UBAZAJSS3OR57RKQ"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Get Drive Item By Id publically",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"view\",\n    \"scope\": \"anonymous\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/items/01RWSCBOWYBGDUE5CK6RBYPORLXB2PLGOJ/createLink",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"items",
+						"01RWSCBOWYBGDUE5CK6RBYPORLXB2PLGOJ",
+						"createLink"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Update Files",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/items/01RWSCBORZSQCPFNNDWZBJSTW452LXUIM6",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"items",
+						"01RWSCBORZSQCPFNNDWZBJSTW452LXUIM6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CRUD Update Files Name",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{AccessToken}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\":\"changeUserName.png\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://graph.microsoft.com/v1.0/drives/{{DriveID}}/items/01RWSCBOREK5WQWMM3UBAZAJSS3OR57RKQ",
+					"protocol": "https",
+					"host": [
+						"graph",
+						"microsoft",
+						"com"
+					],
+					"path": [
+						"v1.0",
+						"drives",
+						"{{DriveID}}",
+						"items",
+						"01RWSCBOREK5WQWMM3UBAZAJSS3OR57RKQ"
+					]
+				}
+			},
+			"response": []
+		}
+	]
 }
-
-Write-Host "Running with Administrator privileges." -ForegroundColor Green
-
-# ---------------------------------------------
-# Network Adapters
-# ---------------------------------------------
-Write-Host ""
-Write-Host "Network Adapters"
-Write-Host "----------------"
-
-Get-NetAdapter | Format-Table Name, InterfaceDescription, Status, MacAddress
-
-# ---------------------------------------------
-# Find WiFi Adapter
-# ---------------------------------------------
-
-$wifi = Get-NetAdapter |
-Where-Object {
-    $_.InterfaceDescription -match "Wireless|Wi-Fi|802.11|Intel|Realtek|Qualcomm|MediaTek"
-}
-
-if($wifi)
-{
-    Write-Host ""
-    Write-Host "WiFi Adapter Found:" -ForegroundColor Green
-
-    $wifi | Format-Table Name, Status, InterfaceDescription
-
-    foreach($adapter in $wifi)
-    {
-        if($adapter.Status -eq "Disabled")
-        {
-            Write-Host ""
-            Write-Host "Enabling Adapter..." -ForegroundColor Yellow
-
-            Enable-NetAdapter `
-                -Name $adapter.Name `
-                -Confirm:$false
-        }
-    }
-}
-else
-{
-    Write-Host ""
-    Write-Host "No WiFi adapter detected!" -ForegroundColor Red
-    Write-Host "Possible Causes:"
-    Write-Host " - Driver Missing"
-    Write-Host " - Hardware Disabled"
-    Write-Host " - BIOS Wireless Disabled"
-}
-
-# ---------------------------------------------
-# WLAN Service
-# ---------------------------------------------
-
-Write-Host ""
-Write-Host "Checking WLAN AutoConfig"
-
-$service = Get-Service WlanSvc -ErrorAction SilentlyContinue
-
-if($service)
-{
-    if($service.Status -ne "Running")
-    {
-        Write-Host "Starting WLAN Service..." -ForegroundColor Yellow
-
-        Set-Service WlanSvc -StartupType Automatic
-
-        Start-Service WlanSvc
-    }
-
-    Write-Host "WLAN Service Running" -ForegroundColor Green
-}
-else
-{
-    Write-Host "WLAN Service Not Found!" -ForegroundColor Red
-}
-
-# ---------------------------------------------
-# Wireless Interface
-# ---------------------------------------------
-
-Write-Host ""
-Write-Host "Wireless Interface"
-Write-Host "------------------"
-
-netsh wlan show interfaces
-
-Write-Host ""
-Write-Host "Wireless Driver"
-Write-Host "---------------"
-
-netsh wlan show drivers
-
-# ---------------------------------------------
-# IP Configuration
-# ---------------------------------------------
-
-Write-Host ""
-Write-Host "IP Configuration"
-Write-Host "----------------"
-
-ipconfig /all
-
-# ---------------------------------------------
-# Network Repair
-# ---------------------------------------------
-
-Write-Host ""
-Write-Host "Resetting Network Stack..."
-
-netsh winsock reset
-
-netsh int ip reset
-
-ipconfig /flushdns
-
-# ---------------------------------------------
-# SFC
-# ---------------------------------------------
-
-Write-Host ""
-Write-Host "Running System File Checker"
-
-sfc /scannow
-
-# ---------------------------------------------
-# Restart Adapter
-# ---------------------------------------------
-
-if($wifi)
-{
-    foreach($adapter in $wifi)
-    {
-        Write-Host ""
-        Write-Host "Restarting Adapter $($adapter.Name)"
-
-        Disable-NetAdapter `
-            -Name $adapter.Name `
-            -Confirm:$false
-
-        Start-Sleep 3
-
-        Enable-NetAdapter `
-            -Name $adapter.Name `
-            -Confirm:$false
-    }
-}
-
-Write-Host ""
-Write-Host "==========================================" -ForegroundColor Cyan
-Write-Host "Diagnostics Completed"
-Write-Host "==========================================" -ForegroundColor Cyan
-
-Write-Host ""
-Write-Host "If WiFi is still missing:"
-Write-Host "1. Check Device Manager."
-Write-Host "2. Scan for Hardware Changes."
-Write-Host "3. Install OEM WiFi Driver."
-Write-Host "4. Check BIOS Wireless Enable."
-Write-Host "5. Reboot Computer."
-
-Write-Host ""
